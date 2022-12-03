@@ -1,86 +1,13 @@
-class Player {
-    constructor(name, geneBank) {
-        this.score = 0;
-        this.geneBank = geneBank ? geneBank : {};
-        if (name?.length > 10)
-            name = name.substring(0, 1) + String.fromCharCode(gNamer++);
-        this.name = name ? name : String.fromCharCode(gNamer++);
-        this.rounds = 0;
-    }
-
-    reset() {
-        this.score = 0;
-        this.rounds = 0;
-    }
-
-    maybe(chance = mutationRate) {
-        return Math.floor(Math.random() * 100) < chance;
-    }
-
-    makeNewEpiGene(r) {
-        this.geneBank[r] = "";
-        for (let i = 0; i < r.length; i++)
-            this.geneBank[r] += this.maybe(50) ? "1" : "0";
-    }
-
-    splice(c, p, key) { //child/parent/key
-        if (c) {
-            if (c == p) this.mutate(key); // (c)hild shares gene: maybe() mutate it
-            else if (this.maybe(50)) c = p; // 50/50 take (p)arent's gene
-        }
-        else
-            c = p; // missing gene, take (p)arents
-    }
-
-    qSplice(geneBank) {
-        // Object.keys(geneBank).forEach((key) => this.splice(this.geneBank[key], geneBank[key], key));
-        for (const key in geneBank) {
-            this.splice(this.geneBank[key], geneBank[key], key)
-        }
-    }
-
-    parent(p) {
-        var child = new Player(this.name + p.name);
-        child.geneBank = structuredClone(this.geneBank);
-        child.qSplice(p.geneBank); // splice parents
-        return child;
-    }
-
-    mGene(key, x) {
-        return this.geneBank[key]
-            .split("")
-            .map((g, i) => {
-                if (i == x)
-                    return g == "1" ? "0" : "1";
-                else
-                    return g;
-            }).join("");
-    }
-
-    mutate(key) {
-        if (this.maybe()) this.geneBank[key] = this.mGene(key, rand(this.geneBank[key].length));
-    }
-
-    chooseScore(r) {
-        if (!this.geneBank[r])
-            this.makeNewEpiGene(r);
-
-        var epiGene = this.geneBank[r];
-        var choice = [];
-        for (let i = 0; i < epiGene.length; i++) {
-            if (epiGene[i] == "1")
-                choice.push(r[i]);
-        }
-        return choice;
-    }
-}
-
 function el(tag, a, text) {	//element builder
     var node = document.createElement(tag);
     var i = 0;
     if (a.length != 0) while (i < (a.length - 1)) { node.setAttribute(a[i], a[++i]); i++; }
     node.innerHTML = text;
     return node;
+}
+
+function rand(max) {
+    return Math.floor(Math.random() * max);
 }
 
 function scoreCard(roll) { // a score array: [reqDice, points]
@@ -128,7 +55,7 @@ function scoreCard(roll) { // a score array: [reqDice, points]
         // three pairs
         if (traits.threePair) return 1502;
         // four of any number with a pair
-        if (traits.quadruples.length > 0 && traits.doubles.length > 1) return 1503; //quad tallies as double
+        if (traits.quadruples.length == 1 && traits.doubles.length == 1) return 1503; //quad tallies as double
         // 2 triples
         if (traits.twoTriples) return 2500;
         // 6 of a kind
@@ -143,14 +70,7 @@ function scoreCard(roll) { // a score array: [reqDice, points]
         var score = gotFullHouse || returnScore;
         if (testingArr[score] === false) {
             testingArr[score] = true;
-
             console.log("score tested:", roll.join("-"), score);
-
-            if (score == 1503) {
-                console.table(nTable);
-                console.log(traits);
-                // debugger;
-            }
         }
     }
 
@@ -207,22 +127,19 @@ function scoreCard(roll) { // a score array: [reqDice, points]
         traits = getTraits();
     }
 
-    // return 50 per 5s rolled
+    // 50 per 5s rolled
     if (traits.fives) {
         returnScore += traits.fives * 49;
         reduce(5);
         traits = getTraits();
     }
 
-    //farkle? 
     if (returnScore)
         submitScoreTesting();
+    // else
+    //console.log("farkle!")
 
-    return [returnScore, roll];
-}
-
-function rand(max) {
-    return Math.floor(Math.random() * max);
+    return [returnScore, reducedRoll];
 }
 
 var roll = [];
@@ -335,16 +252,6 @@ function playGame() {
     updateAfterLifePlayers(winner);
 }
 
-function makeChild(a, b) {
-
-    // clone parent A
-    var newChild = new Player(a.name + b.name);
-    newChild.parent(a, b);
-
-    // console.table([newChild.geneBank, a.geneBank, b.geneBank]);
-    return newChild;
-}
-
 var epochCounter = 0;
 function epoch() {
     epochCounter++;
@@ -377,7 +284,7 @@ function epoch() {
 
     // lottery splicing
     var genePoolDepth = playerArr.length;
-    for (let i = 0; i < genePoolDepth; i++) {
+    for (let i = 0; i < Math.floor(genePoolDepth / 2); i++) {
         playerArr.push(playerArr[rand(poolSize)].parent(playerArr[rand(poolSize)]));
     }
 
@@ -388,24 +295,25 @@ function epoch() {
 }
 
 // global
-var winGoal = 100000;
+var winGoal = 10000;
 var winner = null;
-var fitnessGoal = 400; // win in how many rounds? 
+var fitnessGoal = 30; // win in how many rounds? 
 var mutationRate = 20; // out of 100
 // var epochs = 100; // limit by epoch count
 
 // players
-var gNamer = 65; //global name generator seed
-var playerArr = [];
-var playerCount = 10;
-var cullThreshold = 50;
-var playAfterLife = true;
+var gNamer = 65; // global name generator seed
+var playerArr = []; // gene pool
+var playerCount = 25; // init pop
+var cullThreshold = 50; // max pop size
+var playAfterLife = true; // retain best players in localstorage
+var { updateAfterLifePlayers, getAfterLifePlayers } = afterLife();
 
 // debug
 var halt = false;
 var debugPlay = false;
 var debugWinner = false;
-var testing = true;
+var testing = false;
 var testingArr = {
     49: false,
     99: false,
@@ -424,17 +332,20 @@ var testingArr = {
     3000: false,
 };
 
-
 function stop() { // exit
     console.log("WINNER!");
     console.log(winner);
 
     // log on halt
-    if (halt)
+    if (halt) {
+        console.warn("HALTED");
         console.log(playerArr);
+    }
 
-    if (testing)
+    if (testing) {
+        console.log("TEST COMPLETE!");
         console.table(testingArr);
+    }
 }
 
 async function go() {
@@ -466,21 +377,6 @@ async function go() {
 
 }
 
-function afterLife() {
-    // var afterLifePlay = true;
-    var now = Date.now();
-    var afterLifePlayers = localStorage.getItem("afterLife") ? JSON.parse(localStorage.getItem("afterLife")) : {};
-    return {
-        updateAfterLifePlayers: function (player) {
-            afterLifePlayers[now] = player;
-            localStorage.setItem("afterLife", JSON.stringify(afterLifePlayers));
-        },
-        getAfterLifePlayers: function () {
-            return afterLifePlayers;
-        }
-    }
-}
-var { updateAfterLifePlayers, getAfterLifePlayers } = afterLife();
 
 // HALT button
 document.querySelector("#halt").addEventListener("click", function (e) {
