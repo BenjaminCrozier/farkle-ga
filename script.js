@@ -56,12 +56,12 @@ function scoreCard(roll) { // a score array: [reqDice, points]
     }
 
     function submitScoreTesting() {
-        if (!testing)
+        if (!scoreTesting)
             return;
 
         var score = gotFullHouse || returnScore;
-        if (testingArr[score] === false) {
-            testingArr[score] = true;
+        if (scoreTestingArr[score] === false) {
+            scoreTestingArr[score] = roll.join("-") + " => " + score;
             console.log("score tested:", roll.join("-"), score);
         }
     }
@@ -142,7 +142,15 @@ function playRound(p) {
     }
 
     function rollDice(dCount) {
-        roll = []
+        if (hyperTrain) {
+            roll = luckyRoll(dCount);
+            if (roll.length != dCount) {
+                console.error(roll);
+                throw "hyperTrain fail! requested: " + dCount;
+            }
+        }
+
+        roll = [];
         for (var i = 0; i < dCount; i++) {
             roll[i] = rollDie();
         }
@@ -262,12 +270,15 @@ var cullThreshold = 100; // max pop size
 var playAfterLife = true; // retain best players in localstorage
 var { updateAfterLifePlayers, getAfterLifePlayers } = afterLife();
 
+// hyper training
+var hyperTrain = true; //more accurately: basic understanding 
+
 // debug
 var halt = false;
 var debugPlay = false;
 var debugWinner = false;
-var testing = false;
-var testingArr = {
+var scoreTesting = false;
+var scoreTestingArr = {
     49: false,
     99: false,
     199: false,
@@ -295,9 +306,9 @@ function stop() { // exit
         console.log(playerArr);
     }
 
-    if (testing) {
+    if (scoreTesting) {
         console.log("TEST COMPLETE!");
-        console.table(testingArr);
+        console.table(scoreTestingArr);
     }
 }
 
@@ -313,11 +324,11 @@ async function go() {
     // fitness goal met? (default case)
     var goAgain = winner?.rounds > fitnessGoal;
 
-    // testing override (continue till all tests pass)
-    if (testing) {
+    // scoreTesting override (continue till all tests pass)
+    if (scoreTesting) {
         goAgain = false;
-        for (const score in testingArr) {
-            if (!testingArr[score])
+        for (const score in scoreTestingArr) {
+            if (!scoreTestingArr[score])
                 goAgain = true;
         }
     }
@@ -348,7 +359,7 @@ async function init() {
     if (playAfterLife) {
         var afterLifePlayers = getAfterLifePlayers();
         for (const playerID in afterLifePlayers) {
-            console.log("afterLifePlayer added:", afterLifePlayers[playerID].name, playerID);
+            console.log("afterLifePlayer[" + playerID + "]", afterLifePlayers[playerID].name);
             playerArr.push(new Player(afterLifePlayers[playerID].name, afterLifePlayers[playerID].geneBank));
         }
     }
