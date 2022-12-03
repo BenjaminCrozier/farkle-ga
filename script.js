@@ -1,11 +1,3 @@
-function el(tag, a, text) {	//element builder
-    var node = document.createElement(tag);
-    var i = 0;
-    if (a.length != 0) while (i < (a.length - 1)) { node.setAttribute(a[i], a[++i]); i++; }
-    node.innerHTML = text;
-    return node;
-}
-
 function rand(max) {
     return Math.floor(Math.random() * max);
 }
@@ -145,19 +137,16 @@ function scoreCard(roll) { // a score array: [reqDice, points]
 var roll = [];
 function playRound(p) {
 
-    p.rounds++;
-
     function rollDie() {
         return Math.floor(Math.random() * 6) + 1;
     }
 
     function rollDice(dCount) {
-        for (var i = 1; i <= 6; i++) {
-            if (i <= dCount)
-                roll[i] = rollDie();
-            else
-                delete roll[i];
+        roll = []
+        for (var i = 0; i < dCount; i++) {
+            roll[i] = rollDie();
         }
+        roll = roll.sort();
     }
 
     function play(dCount) {
@@ -185,6 +174,8 @@ function playRound(p) {
         return [reRoll, score];
     }
 
+    // begin round...
+    p.rounds++;
     var [reRoll, score] = [6, 0];
     var tableScore = 0;
 
@@ -201,67 +192,29 @@ function playRound(p) {
         }
     }
     else {
-        if (debugPlay) console.warn(p.name, "FARKLE'd");
+        if (debugPlay) console.log(p.name, "FARKLE'd");
     }
     if (debugPlay) debugger;
-}
-
-function printWinner() {
-    if (debugWinner) console.log("WINNER!", winner);
-
-    function startTable(obj) {
-        table = el("table", ["id", "mainTable"], "");
-        var tr1 = el("tr", [], "");
-        Object.keys(obj).forEach(key => {
-            tr1.appendChild(el("th", [], key));
-        });
-        table.appendChild(tr1);
-        document.body.appendChild(table)
-    }
-
-    function appendTable(obj) {
-        var tr2 = el("tr", [], "");
-        Object.keys(obj).forEach(key => {
-            tr2.appendChild(el("td", [], obj[key]));
-        });
-        table.appendChild(tr2);
-    }
-
-    var nav = {
-        "epoch:": epochCounter,
-        "name:": winner.name,
-        "score:": winner.score,
-        "rounds:": winner.rounds
-    };
-
-    var table = document.querySelector("#mainTable");
-    if (!table) {
-        startTable(nav);
-    }
-    appendTable(nav)
-    window.scrollTo(0, document.body.scrollHeight);
-
 }
 
 function playGame() {
     while (!winner)
         playerArr.forEach(playRound);
-    printWinner();
-
-    // nominate winner to afterLife
-    updateAfterLifePlayers(winner);
+    printWinner(); // display results
+    updateAfterLifePlayers(winner); // nominate winner to afterLife
 }
 
 var epochCounter = 0;
 function epoch() {
-    epochCounter++;
-    // console.log("epoch", epochCounter);
 
     function greaterFitness(a, b) {
         if (a.score > b.score) return -1;
         if (a.score < b.score) return 1;
         return 0;
     }
+
+    // new epoch
+    epochCounter++;
 
     // score and scale
     playerArr = playerArr.sort(greaterFitness);
@@ -274,6 +227,7 @@ function epoch() {
     var poolSize = playerArr.length;
 
     // 1st seed
+    playerArr.push(playerArr[0].parent(playerArr[rand(poolSize)]));
     playerArr.push(playerArr[0].parent(playerArr[rand(poolSize)]));
     playerArr.push(playerArr[0].parent(playerArr[rand(poolSize)]));
     playerArr.push(playerArr[0].parent(playerArr[rand(poolSize)]));
@@ -295,17 +249,16 @@ function epoch() {
 }
 
 // global
-var winGoal = 10000;
+var winGoal = 100000; // game winning score
 var winner = null;
-var fitnessGoal = 30; // win in how many rounds? 
+var fitnessGoal = 400; // win in how many rounds? 
 var mutationRate = 20; // out of 100
-// var epochs = 100; // limit by epoch count
 
 // players
 var gNamer = 65; // global name generator seed
 var playerArr = []; // gene pool
-var playerCount = 25; // init pop
-var cullThreshold = 50; // max pop size
+var playerCount = 50; // init pop
+var cullThreshold = 100; // max pop size
 var playAfterLife = true; // retain best players in localstorage
 var { updateAfterLifePlayers, getAfterLifePlayers } = afterLife();
 
@@ -376,7 +329,6 @@ async function go() {
     return goAgain;
 
 }
-
 
 // HALT button
 document.querySelector("#halt").addEventListener("click", function (e) {

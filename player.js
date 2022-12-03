@@ -3,7 +3,7 @@ class Player {
         this.score = 0;
         this.geneBank = geneBank ? geneBank : {};
         if (name?.length > 10)
-            name = name.substring(0, 1) + String.fromCharCode(gNamer++);
+            name = String.fromCharCode(gNamer++) + name.substring(0, 1);
         this.name = name ? name : String.fromCharCode(gNamer++);
         this.rounds = 0;
     }

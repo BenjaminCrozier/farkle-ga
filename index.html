@@ -12,13 +12,21 @@
 			}
 			table {
 				border: 1px solid white;
+				border-collapse: collapse;
 			}
-			tr:nth-of-type(1) {
+			td {
+				padding: 3px;
+				word-wrap: break-word;
+				max-width: 150px;
+			}
+			th {
+				padding: 5px 15px;
 				background-color: gray;
 				color: yellow;
+				position: sticky;
+				top: 0; /* Don't forget this, required for the stickiness */
 			}
 			tr {
-				padding: 5px 15px;
 				text-align: center;
 			}
 			#halt {
@@ -44,11 +52,42 @@
 				border-top: 4px solid maroon;
 				border-bottom: 0 solid maroon;
 			}
+
+			#genPop {
+				/* column-count: 5; */
+				column-width: 150px;
+			}
+
+			#genPop span {
+				color: yellow;
+			}
+
+			#pop {
+				position: fixed;
+				top: 10px;
+				right: 10px;
+				left: 420px;
+			}
 		</style>
 	</head>
 	<body>
+		<table id="winnersTable">
+			<tr>
+				<th>epoch:</th>
+				<th>name:</th>
+				<th>score:</th>
+				<th>rounds:</th>
+			</tr>
+		</table>
+
+		<div id="pop">
+			<h2>population</h2>
+			<div id="genPop"></div>
+		</div>
+
 		<button id="halt">HALT</button>
 		<script src="player.js"></script>
+		<script src="render.js"></script>
 		<script src="afterLife.js"></script>
 		<script src="script.js"></script>
 	</body>
