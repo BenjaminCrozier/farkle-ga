@@ -13,24 +13,66 @@ class Player {
         this.rounds = 0;
     }
 
-    maybe() {
-        return Math.floor(Math.random() * 2);
+    maybe(chance = mutationRate) {
+        return Math.floor(Math.random() * 100) < chance;
     }
 
     makeNewEpiGene(r) {
         this.geneBank[r] = "";
         for (let i = 0; i < r.length; i++)
-            this.geneBank[r] += this.maybe();
-        // console.log("new gene:", r + "x" + this.geneBank[r]);
+            this.geneBank[r] += this.maybe(50) ? "1" : "0";
+    }
+
+    splice(c, p, key) { //child/parent/key
+        if (c) {
+            if (c == p) this.mutate(key); // (c)hild shares gene: maybe() mutate it
+            else if (this.maybe(50)) c = p; // 50/50 take (p)arent's gene
+        }
+        else
+            c = p; // missing gene, take (p)arents
+    }
+
+    qSplice(geneBank) {
+        // Object.keys(geneBank).forEach((key) => this.splice(this.geneBank[key], geneBank[key], key));
+        for (const key in geneBank) {
+            this.splice(this.geneBank[key], geneBank[key], key)
+        }
+    }
+
+    parent(p) {
+        var child = new Player(this.name + p.name);
+        child.geneBank = structuredClone(this.geneBank);
+        child.qSplice(p.geneBank); // splice parents
+        return child;
+    }
+
+    mGene(key, x) {
+        return this.geneBank[key]
+            .split("")
+            .map((g, i) => {
+                if (i == x)
+                    return g == "1" ? "0" : "1";
+                else
+                    return g;
+            }).join("");
+    }
+
+    mutate(key) {
+        if (this.maybe()) this.geneBank[key] = this.mGene(key, rand(this.geneBank[key].length));
     }
 
     chooseScore(r) {
         if (!this.geneBank[r])
             this.makeNewEpiGene(r);
-        var epiGeneArr = this.geneBank[r].split("");
-        return r.split("").filter((g, i) => "1" == epiGeneArr[i]);
-    }
 
+        var epiGene = this.geneBank[r];
+        var choice = [];
+        for (let i = 0; i < epiGene.length; i++) {
+            if (epiGene[i] == "1")
+                choice.push(r[i]);
+        }
+        return choice;
+    }
 }
 
 function el(tag, a, text) {	//element builder
@@ -43,123 +85,44 @@ function el(tag, a, text) {	//element builder
 
 function scoreCard(roll) { // a score array: [reqDice, points]
 
+    if (roll.length == 0)
+        return [0, 0]; //null case
+
+    var reducedRoll = roll;
+    var nTable = [[], [], [], [], [], [], []];
     function getTraits() {
 
-        // TODO: optimize
-        // 1: hash table, o(1) index of scores, for any given string 1-6 return a score instantly
-
-        // function count(n) { // how many n's?
-        //     var c = 0;
-        //     roll.forEach(d => { if (d == n) c++; });
-        //     return c;
-        //     // return roll.filter(die => die == n).length;
-        // }
-
-        // var count1 = count(1);
-        // var count2 = count(2);
-        // var count3 = count(3);
-        // var count4 = count(4);
-        // var count5 = count(5);
-        // var count6 = count(6);
-
         function count() { // we're going for speed
-            var arr = [0, 0, 0, 0, 0, 0];
-            roll.forEach(d => {
-                count[d]++;
+            var arr = [0, 0, 0, 0, 0, 0, 0];
+            reducedRoll.forEach(d => {
+                arr[d]++;
             });
             return arr;
         }
-        var [count1, count2, count3, count4, count5, count6,] = count();
-
-        // var dups1 = dups(1);
-        var dups2 = dups(2);
-        var dups3 = dups(3);
-        var dups4 = dups(4);
-        var dups5 = dups(5);
-        var dups6 = dups(6);
+        var countArr = count();
 
 
-        function straight() {
-            if (count1 == 0) return false;
-            if (count2 == 0) return false;
-            if (count3 == 0) return false;
-            if (count4 == 0) return false;
-            if (count5 == 0) return false;
-            if (count6 == 0) return false;
-            return true;
-        }
-
-        function dups(n) {
-
-            // var tally = [
-            //     count1 == n,
-            //     count2 == n,
-            //     count3 == n,
-            //     count4 == n,
-            //     count5 == n,
-            //     count6 == n
-            // ];
-
-            // var tallyCount = tally.filter(x => x).length;
-            // var matching = tally.map((x, i) => x ? i + 1 : false).filter(x => x ? x : false);
-            // return { matching, tallyCount };
-
-            var tallyCount = 0;
-            var matching = [];
-
-            // tally.forEach((x, i) => {
-            //     if (x) {
-            //         tallyCount++;
-            //         matching.push(i + 1);
-            //     }
-            // });
-
-            if (count1 == n) {
-                tallyCount++;
-                matching.push(1);
-            }
-            if (count2 == n) {
-                tallyCount++;
-                matching.push(2);
-            }
-            if (count3 == n) {
-                tallyCount++;
-                matching.push(3);
-            }
-            if (count4 == n) {
-                tallyCount++;
-                matching.push(4);
-            }
-            if (count5 == n) {
-                tallyCount++;
-                matching.push(5);
-            }
-            if (count6 == n) {
-                tallyCount++;
-                matching.push(6);
-            }
-
-            return { matching, tallyCount };
-        }
+        countArr.forEach((c, i) => {
+            nTable[c].push(i);
+        })
 
         return {
-            ones: count1,
-            fives: count5,
-            straight: straight(),
-            doubles: dups2.matching,
-            triples: dups3.matching,
-            quadruples: dups4.matching,
-            quintuples: dups5.matching,
-            sextuples: dups6.matching,
-            threePair: dups2.tallyCount == 3,
-            twoTriples: dups3.tallyCount == 2,
+            ones: countArr[1],
+            fives: countArr[5],
+            straight: nTable[1].length == 6 ? true : false,
+            doubles: nTable[2],
+            triples: nTable[3],
+            quadruples: nTable[4],
+            quintuples: nTable[5],
+            sextuples: nTable[6],
+            threePair: nTable[2].length == 3 ? true : false,
+            twoTriples: nTable[3].length == 2 ? true : false,
         }
     }
-
     var traits = getTraits();
 
     function fullHouse() {
-        if (roll.length < 6) return false; //exit case
+        if (reducedRoll.length < 6) return false; //exit case
         // straight
         if (traits.straight) return 1501;
         // three pairs
@@ -173,17 +136,38 @@ function scoreCard(roll) { // a score array: [reqDice, points]
         return false;
     }
 
+    function submitScoreTesting() {
+        if (!testing)
+            return;
+
+        var score = gotFullHouse || returnScore;
+        if (testingArr[score] === false) {
+            testingArr[score] = true;
+
+            console.log("found score", roll.join("-"), score);
+
+            if (score == 1503) {
+                console.table(nTable);
+                console.log(traits);
+                // debugger;
+            }
+        }
+    }
+
     //6 dice req
     var gotFullHouse = fullHouse();
-    if (gotFullHouse) return [gotFullHouse, 0];
+    if (gotFullHouse) {
+        submitScoreTesting();
+        return [gotFullHouse, 0];
+    }
 
     //<6 dice req
     var returnScore = 0;
 
     function threeKind() {
         if (traits.triples.length > 0) {
-            if (traits.triples[0] == 1) return 300;
-            if (traits.triples[0] == 2) return 200;
+            if (traits.triples[0] == 1) return 299;
+            if (traits.triples[0] == 2) return 199;
             if (traits.triples[0] == 3) return 300;
             if (traits.triples[0] == 4) return 400;
             if (traits.triples[0] == 5) return 500;
@@ -194,7 +178,7 @@ function scoreCard(roll) { // a score array: [reqDice, points]
     }
 
     function reduce(n) {
-        roll = roll.filter(d => d != n);
+        reducedRoll = reducedRoll.filter(d => d != n);
     }
 
     // 5 of a kind: 2000
@@ -213,23 +197,26 @@ function scoreCard(roll) { // a score array: [reqDice, points]
     if (traits.triples.length > 0) {
         returnScore += threeKind(); //double triplets is covered by fullHouse()
         reduce(traits.triples[0]);
+        traits = getTraits();
     }
 
     // 100 per 1s rolled
     if (traits.ones) {
-        returnScore += traits.ones * 100;
+        returnScore += traits.ones * 99;
         reduce(1);
+        traits = getTraits();
     }
 
     // return 50 per 5s rolled
     if (traits.fives) {
-        returnScore += traits.fives * 50;
+        returnScore += traits.fives * 49;
         reduce(5);
+        traits = getTraits();
     }
 
     //farkle? 
-    // if (!returnScore)
-    //     console.warn("FARKLE!");
+    if (returnScore)
+        submitScoreTesting();
 
     return [returnScore, roll];
 }
@@ -238,6 +225,7 @@ function rand(max) {
     return Math.floor(Math.random() * max);
 }
 
+var roll = [];
 function playRound(p) {
 
     p.rounds++;
@@ -247,23 +235,22 @@ function playRound(p) {
     }
 
     function rollDice(dCount) {
-        var dArr = [];
-        for (var i = 1; i <= dCount; i++) {
-            dArr.push(rollDie());
+        for (var i = 1; i <= 6; i++) {
+            if (i <= dCount)
+                roll[i] = rollDie();
+            else
+                delete roll[i];
         }
-        return dArr.sort();
     }
 
     function play(dCount) {
-        var roll = rollDice(dCount);
+        // var roll = rollDice(dCount);
+        rollDice(dCount);
         var rChoice = p.chooseScore(roll.join(""));
         var [score, rollRem] = scoreCard(rChoice);
         var epiGene = p.geneBank[roll.join("")];
 
-        if (debug) console.log(p.name, roll.join("") + "x" + epiGene, "=>", score, rollRem);
-
-        if (score == 1503)
-            console.log(p.name, roll.join("") + "x" + epiGene, "=>", score, rollRem)
+        if (debugPlay) console.log(p.name, roll.join("") + "x" + epiGene, "...", rChoice.join("-"), "=>", score, "(rem:", rollRem.length ? rollRem.join("-") : null, ")");
 
         // farkle? (or forfiet) 
         if (score == 0)
@@ -275,7 +262,7 @@ function playRound(p) {
         // if all dice scored, get 6 dice back (assumes re-roll on reset)
         if (reRoll == 0 && rollRem.length == 0) { // reset case: all valid die reset roll
             reRoll = 6;
-            if (debug) console.log("~~BONUS~~")
+            if (debugPlay) console.log("~~BONUS~~")
         }
 
         return [reRoll, score];
@@ -292,16 +279,15 @@ function playRound(p) {
 
     if (tableScore) {
         p.score += tableScore; //end round
-        if (debug) console.log(p.name, "SCORED", tableScore);
-
         if (p.score >= winGoal) {
             winner = p;
             printWinner()
         }
     }
     else {
-        if (debug) console.warn(p.name, "FARKLE'd");
+        if (debugPlay) console.warn(p.name, "FARKLE'd");
     }
+    if (debugPlay) debugger;
 }
 
 function printWinner() {
@@ -344,43 +330,14 @@ function playGame() {
     // console.log("playGame():", playerArr.length, "players");
     while (!winner)
         playerArr.forEach(playRound);
-    // console.table(winner.geneBank);
-    if (debug) console.log("WINNER!", winner.name, winner.score);
+    if (debugWinner) console.log("WINNER!", winner);
 }
 
 function makeChild(a, b) {
 
-    function maybe() {
-        return Math.floor(Math.random() * 100) < mutationRate;
-    }
-
-    function mutate(g) {
-        if (maybe()) {
-            var mutant = g.split('');
-            var randSeq = rand(g.length);
-            mutant[randSeq] = mutant[randSeq] == "1" ? "0" : "1"; //flip
-            return mutant.join('');
-        }
-        else return g;
-    }
-
     // clone parent A
     var newChild = new Player(a.name + b.name);
-    newChild.geneBank = structuredClone(a.geneBank);
-
-    // index parent B
-    Object.keys(b.geneBank).forEach(key => {
-        // for a given gene...
-        var gene = newChild.geneBank[key];
-        if (gene) {
-            // if genes match: mutate
-            if (gene == b.geneBank[key]) newChild.geneBank[key] = mutate(gene);
-
-            // else choose random chromosome donar
-            else if (maybe() == 1) newChild.geneBank[key] = b.geneBank[key];
-        }
-        else newChild.geneBank[key] = b.geneBank[key]; //if gene DNE: take it from parent B
-    });
+    newChild.parent(a, b);
 
     // console.table([newChild.geneBank, a.geneBank, b.geneBank]);
     return newChild;
@@ -408,19 +365,18 @@ function epoch() {
     var poolSize = playerArr.length;
 
     // 1st seed
-    playerArr.push(makeChild(playerArr[0], playerArr[rand(poolSize)]));
-    playerArr.push(makeChild(playerArr[0], playerArr[rand(poolSize)]));
-    playerArr.push(makeChild(playerArr[0], playerArr[rand(poolSize)]));
+    playerArr.push(playerArr[0].parent(playerArr[rand(poolSize)]));
+    playerArr.push(playerArr[0].parent(playerArr[rand(poolSize)]));
+    playerArr.push(playerArr[0].parent(playerArr[rand(poolSize)]));
 
     // 2nd seed
-    playerArr.push(makeChild(playerArr[1], playerArr[rand(poolSize)]));
-    playerArr.push(makeChild(playerArr[1], playerArr[rand(poolSize)]));
+    playerArr.push(playerArr[1].parent(playerArr[rand(poolSize)]));
+    playerArr.push(playerArr[1].parent(playerArr[rand(poolSize)]));
 
     // lottery splicing
     var genePoolDepth = playerArr.length;
     for (let i = 0; i < genePoolDepth; i++) {
-        // console.log("newChild", newChild.name);
-        playerArr.push(makeChild(playerArr[i], playerArr[rand(poolSize)]));
+        playerArr.push(playerArr[rand(poolSize)].parent(playerArr[rand(poolSize)]));
     }
 
     // reset epoch
@@ -439,15 +395,47 @@ var mutationRate = 20; // out of 100
 // players
 var gNamer = 65; //global name generator seed
 var playerArr = [];
-var playerCount = 100;
-var cullThreshold = 100;
+var playerCount = 10;
+var cullThreshold = 50;
 
-// 
+
+// debug
 var halt = false;
-var debug = false;
+var debugPlay = false;
+var debugWinner = true;
+var testing = true;
+var testingArr = {
+    49: false,
+    99: false,
+    199: false,
+    299: false,
+    300: false,
+    400: false,
+    500: false,
+    600: false,
+    1000: false,
+    1501: false,
+    1502: false,
+    1503: false,
+    2000: false,
+    2500: false,
+    3000: false,
+};
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function stop() { // exit
+    console.log("WINNER!");
+    console.log(winner);
+
+    // log on halt
+    if (halt)
+        console.log(playerArr);
+
+    if (testing)
+        console.table(testingArr);
 }
 
 async function go() {
@@ -455,17 +443,29 @@ async function go() {
     playGame();
     await sleep(0); //page update
 
-    if (!halt && winner?.rounds > fitnessGoal) { // play again?
-        epoch();
-        await go();
-    }
-    else { // on exit
-        console.log(winner);
+    // fitness goal met? (default case)
+    var goAgain = winner?.rounds > fitnessGoal;
 
-        // log on halt
-        if (halt)
-            console.log(playerArr);
+    // testing override (continue till all tests pass)
+    if (testing) {
+        goAgain = false;
+        for (const score in testingArr) {
+            if (!testingArr[score])
+                goAgain = true;
+        }
     }
+
+    // halting override
+    if (halt)
+        goAgain = false;
+
+    // play again?
+    if (goAgain) {
+        epoch(); //evolve
+        await go(); //next round
+    }
+    else
+        stop();
 
 }
 
@@ -478,12 +478,6 @@ function init() {
     }
 
     go();
-
-    // for (var i = 0; i < epochs; i++) {
-    // playGame();
-    // epoch();
-    // }
-
 }
 
 // HALT button
