@@ -1,7 +1,7 @@
 class Player {
-    constructor(name) {
+    constructor(name, geneBank) {
         this.score = 0;
-        this.geneBank = {};
+        this.geneBank = geneBank ? geneBank : {};
         if (name?.length > 10)
             name = name.substring(0, 1) + String.fromCharCode(gNamer++);
         this.name = name ? name : String.fromCharCode(gNamer++);
@@ -144,7 +144,7 @@ function scoreCard(roll) { // a score array: [reqDice, points]
         if (testingArr[score] === false) {
             testingArr[score] = true;
 
-            console.log("found score", roll.join("-"), score);
+            console.log("score tested:", roll.join("-"), score);
 
             if (score == 1503) {
                 console.table(nTable);
@@ -281,7 +281,6 @@ function playRound(p) {
         p.score += tableScore; //end round
         if (p.score >= winGoal) {
             winner = p;
-            printWinner()
         }
     }
     else {
@@ -291,6 +290,7 @@ function playRound(p) {
 }
 
 function printWinner() {
+    if (debugWinner) console.log("WINNER!", winner);
 
     function startTable(obj) {
         table = el("table", ["id", "mainTable"], "");
@@ -327,10 +327,12 @@ function printWinner() {
 }
 
 function playGame() {
-    // console.log("playGame():", playerArr.length, "players");
     while (!winner)
         playerArr.forEach(playRound);
-    if (debugWinner) console.log("WINNER!", winner);
+    printWinner();
+
+    // nominate winner to afterLife
+    updateAfterLifePlayers(winner);
 }
 
 function makeChild(a, b) {
@@ -397,12 +399,12 @@ var gNamer = 65; //global name generator seed
 var playerArr = [];
 var playerCount = 10;
 var cullThreshold = 50;
-
+var playAfterLife = true;
 
 // debug
 var halt = false;
 var debugPlay = false;
-var debugWinner = true;
+var debugWinner = false;
 var testing = true;
 var testingArr = {
     49: false,
@@ -422,9 +424,6 @@ var testingArr = {
     3000: false,
 };
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-}
 
 function stop() { // exit
     console.log("WINNER!");
@@ -439,6 +438,10 @@ function stop() { // exit
 }
 
 async function go() {
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
 
     playGame();
     await sleep(0); //page update
@@ -459,26 +462,25 @@ async function go() {
     if (halt)
         goAgain = false;
 
-    // play again?
-    if (goAgain) {
-        epoch(); //evolve
-        await go(); //next round
-    }
-    else
-        stop();
+    return goAgain;
 
 }
 
-function init() {
-    console.log("init()");
-
-    // begin
-    for (var i = 0; i < playerCount; i++) {
-        playerArr.push(new Player());
+function afterLife() {
+    // var afterLifePlay = true;
+    var now = Date.now();
+    var afterLifePlayers = localStorage.getItem("afterLife") ? JSON.parse(localStorage.getItem("afterLife")) : {};
+    return {
+        updateAfterLifePlayers: function (player) {
+            afterLifePlayers[now] = player;
+            localStorage.setItem("afterLife", JSON.stringify(afterLifePlayers));
+        },
+        getAfterLifePlayers: function () {
+            return afterLifePlayers;
+        }
     }
-
-    go();
 }
+var { updateAfterLifePlayers, getAfterLifePlayers } = afterLife();
 
 // HALT button
 document.querySelector("#halt").addEventListener("click", function (e) {
@@ -486,6 +488,32 @@ document.querySelector("#halt").addEventListener("click", function (e) {
     halt = true;
 });
 
+async function init() {
+    console.log("init()");
+
+    // player pool
+    for (var i = 0; i < playerCount; i++) {
+        playerArr.push(new Player());
+    }
+
+    // add afterlife player pool
+    if (playAfterLife) {
+        var afterLifePlayers = getAfterLifePlayers();
+        for (const playerID in afterLifePlayers) {
+            console.log("afterLifePlayer added:", afterLifePlayers[playerID].name, playerID);
+            playerArr.push(new Player(afterLifePlayers[playerID].name, afterLifePlayers[playerID].geneBank));
+        }
+    }
+
+    // game loop
+    var goAgain = true;
+    while (goAgain) {
+        epoch(); //evolve
+        goAgain = await go(); //next round
+    }
+    stop();
+
+}
 init();
 
 
