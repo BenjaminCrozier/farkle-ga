@@ -13,8 +13,12 @@ class Player {
         this.rounds = 0;
     }
 
-    maybe(chance = mutationRate) {
+    maybe(chance) {
         return Math.floor(Math.random() * 100) < chance;
+    }
+
+    mutationChance(){
+        return Math.floor(Math.random() * 1000) < mutationRate;
     }
 
     makeNewEpiGene(r) {
@@ -25,11 +29,20 @@ class Player {
 
     splice(c, p, key) { //child/parent/key
         if (c) {
-            if (c == p) this.mutate(key); // (c)hild shares gene: maybe() mutate it
+            if (c == p) {
+                if (this.mutationChance()) {
+                    this.geneBank[key] = this.mutate(c); // (c)hild shares gene: maybe() mutate it
+                }
+            }
             else if (this.maybe(50)) c = p; // 50/50 take (p)arent's gene
         }
         else
             c = p; // missing gene, take (p)arents
+
+        // random mutation
+        if (this.mutationChance()) {
+            this.geneBank[key] = this.mutate(c); // random mutations
+        }
     }
 
     qSplice(geneBank) {
@@ -46,8 +59,9 @@ class Player {
         return child;
     }
 
-    mGene(key, x) {
-        return this.geneBank[key]
+    mutate(gene) {
+        var x = rand(gene.length);
+        return gene
             .split("")
             .map((g, i) => {
                 if (i == x)
@@ -55,10 +69,6 @@ class Player {
                 else
                     return g;
             }).join("");
-    }
-
-    mutate(key) {
-        if (this.maybe()) this.geneBank[key] = this.mGene(key, rand(this.geneBank[key].length));
     }
 
     chooseScore(r) {

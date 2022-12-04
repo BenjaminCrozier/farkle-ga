@@ -10,19 +10,17 @@ function scoreCard(roll) { // a score array: [reqDice, points]
     var reducedRoll = roll;
     var nTable = [[], [], [], [], [], [], []];
     function getTraits() {
-
         function count() { // we're going for speed
             var arr = [0, 0, 0, 0, 0, 0, 0];
-            reducedRoll.forEach(d => {
-                arr[d]++;
-            });
+            for (let i = 0; i < reducedRoll.length; i++) {
+                arr[reducedRoll[i]]++;
+            }
             return arr;
         }
-        var countArr = count();
 
-
+        var countArr = count(); // arr[1] is the number of 1's, etc
         countArr.forEach((c, i) => {
-            nTable[c].push(i);
+            nTable[c].push(i); // arr[x, y, z] -> x = 0 instances, y = 1 instances, z = 2 instances
         })
 
         return {
@@ -144,15 +142,12 @@ function playRound(p) {
     function rollDice(dCount) {
         if (hyperTrain) {
             roll = luckyRoll(dCount);
-            if (roll.length != dCount) {
-                console.error(roll);
-                throw "hyperTrain fail! requested: " + dCount;
-            }
         }
-
-        roll = [];
-        for (var i = 0; i < dCount; i++) {
-            roll[i] = rollDie();
+        else {
+            roll = [];
+            for (var i = 0; i < dCount; i++) {
+                roll[i] = rollDie();
+            }
         }
         roll = roll.sort();
     }
@@ -176,32 +171,35 @@ function playRound(p) {
         // if all dice scored, get 6 dice back (assumes re-roll on reset)
         if (reRoll == 0 && rollRem.length == 0) { // reset case: all valid die reset roll
             reRoll = 6;
-            if (debugPlay) console.log("~~BONUS~~")
+            if (debugPlay) console.log(p.name, "~~BONUS~~")
         }
 
         return [reRoll, score];
     }
 
-    // begin round...
+    // begin turn...
     p.rounds++;
-    var [reRoll, score] = [6, 0];
-    var tableScore = 0;
+    function turn() {
+        var [reRoll, score] = [6, 0];
+        var tableScore = 0;
 
-    while (reRoll) {
-        [reRoll, score] = play(reRoll);
-        if (score == 0) tableScore = 0;
-        else tableScore += score;
-    }
+        while (reRoll) {
+            [reRoll, score] = play(reRoll);
+            if (score == 0) tableScore = 0;
+            else tableScore += score;
+        }
 
-    if (tableScore) {
-        p.score += tableScore; //end round
-        if (p.score >= winGoal) {
-            winner = p;
+        if (tableScore) {
+            p.score += tableScore; //end round
+            if (p.score >= winGoal) {
+                winner = p;
+            }
+        }
+        else {
+            if (debugPlay) console.log(p.name, "~~FARKLE~~");
         }
     }
-    else {
-        if (debugPlay) console.log(p.name, "FARKLE'd");
-    }
+    turn();
     if (debugPlay) debugger;
 }
 
@@ -214,6 +212,7 @@ function playGame() {
 
 var epochCounter = 0;
 function epoch() {
+
 
     function greaterFitness(a, b) {
         if (a.score > b.score) return -1;
@@ -228,26 +227,37 @@ function epoch() {
     playerArr = playerArr.sort(greaterFitness);
 
     // retain elite (winter cull)
-    if (playerArr.length > cullThreshold)
+    if (playerArr.length > cullThreshold) {
         playerArr = playerArr.splice(0, cullThreshold);
+    }
 
     // select parents
     var poolSize = playerArr.length;
 
-    // 1st seed
-    playerArr.push(playerArr[0].parent(playerArr[rand(poolSize)]));
-    playerArr.push(playerArr[0].parent(playerArr[rand(poolSize)]));
-    playerArr.push(playerArr[0].parent(playerArr[rand(poolSize)]));
-    playerArr.push(playerArr[0].parent(playerArr[rand(poolSize)]));
+    // herald new child
+    // renderWinnerDNA(newChild);
 
-    // 2nd seed
-    playerArr.push(playerArr[1].parent(playerArr[rand(poolSize)]));
-    playerArr.push(playerArr[1].parent(playerArr[rand(poolSize)]));
+    // royalty
+    playerArr.push(playerArr[0].parent(playerArr[1]));
+    // playerArr.push(playerArr[0].parent(playerArr[2]));
+
+    // playerArr.push(playerArr[2].parent(playerArr[3]));
+    // playerArr.push(playerArr[4].parent(playerArr[5]));
+    // playerArr.push(playerArr[5].parent(playerArr[6]));
+
+    // // 1st seed
+    // playerArr.push(playerArr[0].parent(playerArr[rand(poolSize)]));
+    // playerArr.push(playerArr[0].parent(playerArr[rand(poolSize)]));
+    // playerArr.push(playerArr[0].parent(playerArr[rand(poolSize)]));
+
+    // // 2nd seed
+    // playerArr.push(playerArr[1].parent(playerArr[rand(poolSize)]));
+    // playerArr.push(playerArr[1].parent(playerArr[rand(poolSize)]));
 
     // lottery splicing
     var genePoolDepth = playerArr.length;
     for (let i = 0; i < Math.floor(genePoolDepth / 2); i++) {
-        playerArr.push(playerArr[rand(poolSize)].parent(playerArr[rand(poolSize)]));
+        playerArr.push(playerArr[i].parent(playerArr[rand(poolSize)]));
     }
 
     // reset epoch
@@ -257,21 +267,22 @@ function epoch() {
 }
 
 // global
-var winGoal = 100000; // game winning score
+var winGoal = 1000000; // game winning score
 var winner = null;
-var fitnessGoal = 400; // win in how many rounds? 
-var mutationRate = 20; // out of 100
+var fitnessGoal = 2; // win in how many rounds? 
+var mutationRate = 5; // out of 1000
 
 // players
 var gNamer = 65; // global name generator seed
 var playerArr = []; // gene pool
 var playerCount = 50; // init pop
-var cullThreshold = 100; // max pop size
+var cullThreshold = 500; // max pop size
 var playAfterLife = true; // retain best players in localstorage
 var { updateAfterLifePlayers, getAfterLifePlayers } = afterLife();
 
 // hyper training
 var hyperTrain = true; //more accurately: basic understanding 
+var hyperFitness = 2500;
 
 // debug
 var halt = false;
@@ -310,6 +321,10 @@ function stop() { // exit
         console.log("TEST COMPLETE!");
         console.table(scoreTestingArr);
     }
+
+    if (hyperTrain) {
+        console.table("winner training score:", hyperTrainingScore(winner));
+    }
 }
 
 async function go() {
@@ -331,6 +346,16 @@ async function go() {
             if (!scoreTestingArr[score])
                 goAgain = true;
         }
+    }
+
+    // hyperTraining override 
+    if (hyperTrain) {
+        var trainingScore = hyperTrainingBias(winner);
+        console.table("hyperTrainingBias:", trainingScore);
+        if (trainingScore < hyperFitness)
+            goAgain = true;
+        else
+            goAgain = false;
     }
 
     // halting override
@@ -365,7 +390,8 @@ async function init() {
     }
 
     // game loop
-    var goAgain = true;
+    // var goAgain = true;
+    var goAgain = await go(); //next round
     while (goAgain) {
         epoch(); //evolve
         goAgain = await go(); //next round

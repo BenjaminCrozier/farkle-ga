@@ -6,6 +6,17 @@ function el(tag, a, text) {	//element builder
     return node;
 }
 
+function renderWinnerDNA(player) {
+    var newHTML = ""
+
+    for (key in player.geneBank) {
+        newHTML += key + "x" + player.geneBank[key] + "<br>";
+    }
+
+    document.querySelector("#popH2").innerText = player.name;
+    document.querySelector("#genPop").innerHTML = newHTML;
+}
+
 function renderPlayers() {
     function compare(a, b) { //oldest names first
         if (a.name < b.name) {
@@ -22,10 +33,10 @@ function renderPlayers() {
     playerArr
         .sort(compare)
         .forEach(p => {
-            if(p.name == winner.name)
-            htmlString += "<span>" + p.name + "</span><br>";
-            else    
-            htmlString += p.name + "<br>";
+            if (p.name == winner.name)
+                htmlString += "<span>" + p.name + "</span><br>";
+            else
+                htmlString += p.name + "<br>";
         })
     div.innerHTML = htmlString;
 }
@@ -52,8 +63,8 @@ function printWinner() {
     var table = document.querySelector("#winnersTable");
     appendTable(nav);
     renderPlayers();
+    // renderWinnerDNA(winner);
 
     // scroll
-    window.scrollTo(0, document.body.scrollHeight);
-
+    // window.scrollTo(0, document.body.scrollHeight);
 }

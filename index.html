@@ -13,6 +13,10 @@
 			table {
 				border: 1px solid white;
 				border-collapse: collapse;
+
+				position: fixed;
+				bottom: 20px;
+				left: 20px;
 			}
 			td {
 				padding: 3px;
@@ -55,7 +59,9 @@
 
 			#genPop {
 				/* column-count: 5; */
-				column-width: 150px;
+				column-width: 200px;
+				white-space: pre-wrap;
+				overflow-wrap: anywhere;
 			}
 
 			#genPop span {
@@ -81,7 +87,7 @@
 		</table>
 
 		<div id="pop">
-			<h2>population</h2>
+			<h2 id="popH2">population</h2>
 			<div id="genPop"></div>
 		</div>
 
