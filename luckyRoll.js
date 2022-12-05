@@ -1,4 +1,3 @@
-
 function luckyRoll(dCount) {
 
     function rollDie() {
@@ -183,15 +182,15 @@ function luckyRoll(dCount) {
     return [one, two, three, four, five, six][dCount - 1]();
 }
 
-function hyperTrainingScore(p) {
-    var geneString = JSON.stringify(p.geneBank);
-    var reRolls = geneString.match(/[0]/g).length;
-    var nonScoringDie = geneString.match(/[2346]/g).length;
-    var trainingScore = reRolls - nonScoringDie;
-    return Math.abs(trainingScore);
-}
+// function hyperTrainingScore(p) {
+//     var geneString = JSON.stringify(p.geneBank);
+//     var reRolls = geneString.match(/[0]/g).length;
+//     var nonScoringDie = geneString.match(/[2346]/g).length;
+//     var trainingScore = reRolls - nonScoringDie;
+//     return Math.abs(trainingScore);
+// }
 
-function hyperTrainingBias(p) {
-    var geneString = JSON.stringify(p.geneBank);
-    return geneString.match(/[1]/g).length;
-}
+// function hyperTrainingBias(p) {
+//     var geneString = JSON.stringify(p.geneBank);
+//     return geneString.match(/[1]/g).length;
+// }

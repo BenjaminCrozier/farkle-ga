@@ -2,10 +2,30 @@ class Player {
     constructor(name, geneBank) {
         this.score = 0;
         this.geneBank = geneBank ? geneBank : {};
-        if (name?.length > 10)
-            name = String.fromCharCode(gNamer++) + name.substring(0, 1);
-        this.name = name ? name : String.fromCharCode(gNamer++);
+        this.gender = this.maybe(50);
+        if (name?.length > 10) {
+            if (this.gender)
+                name = [...name][0] + String.fromCodePoint(gNamer++);
+            else
+                name = String.fromCodePoint(gNamer++) + [...name][0];
+            // name = String.fromCharCode(gNamer++) + this.freqChar(name); //retain name with "most dna"
+        }
+        this.name = name ? name : String.fromCodePoint(gNamer++);
         this.rounds = 0;
+    }
+
+    freqChar(name) {
+        var nameTally = {};
+        [...name].forEach(c => nameTally[c] = nameTally[c] ? nameTally[c] + 1 : 1);
+        var maxValue = 0;
+        var maxChar = null;
+        for (const key in nameTally) {
+            if (maxValue < nameTally[key]) {
+                maxChar = key;
+                maxValue = nameTally[key];
+            }
+        }
+        return maxChar;
     }
 
     reset() {
@@ -17,7 +37,7 @@ class Player {
         return Math.floor(Math.random() * 100) < chance;
     }
 
-    mutationChance(){
+    mutationChance() {
         return Math.floor(Math.random() * 1000) < mutationRate;
     }
 
@@ -53,7 +73,8 @@ class Player {
     }
 
     parent(p) {
-        var child = new Player(this.name + p.name);
+        var name = this.gender ? (this.name + p.name) : (p.name + this.name);
+        var child = new Player(name);
         child.geneBank = structuredClone(this.geneBank);
         child.qSplice(p.geneBank); // splice parents
         return child;

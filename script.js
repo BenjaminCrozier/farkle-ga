@@ -53,21 +53,9 @@ function scoreCard(roll) { // a score array: [reqDice, points]
         return false;
     }
 
-    function submitScoreTesting() {
-        if (!scoreTesting)
-            return;
-
-        var score = gotFullHouse || returnScore;
-        if (scoreTestingArr[score] === false) {
-            scoreTestingArr[score] = roll.join("-") + " => " + score;
-            console.log("score tested:", roll.join("-"), score);
-        }
-    }
-
     //6 dice req
     var gotFullHouse = fullHouse();
     if (gotFullHouse) {
-        submitScoreTesting();
         return [gotFullHouse, 0];
     }
 
@@ -107,40 +95,42 @@ function scoreCard(roll) { // a score array: [reqDice, points]
     if (traits.triples.length > 0) {
         returnScore += threeKind(); //double triplets is covered by fullHouse()
         reduce(traits.triples[0]);
-        traits = getTraits();
+        traits = getTraits(); // don't double count 1's and 5's
     }
 
     // 100 per 1s rolled
     if (traits.ones) {
         returnScore += traits.ones * 99;
         reduce(1);
-        traits = getTraits();
+        // traits = getTraits();
     }
 
     // 50 per 5s rolled
     if (traits.fives) {
         returnScore += traits.fives * 49;
         reduce(5);
-        traits = getTraits();
+        // traits = getTraits();
     }
 
-    if (returnScore)
-        submitScoreTesting();
-    // else
-    //console.log("farkle!")
+    return [returnScore, reducedRoll.length];
+}
 
-    return [returnScore, reducedRoll];
+function submitScoreTesting(score) {
+    if (scoreTestingArr[score] === false) {
+        scoreTestingArr[score] = roll.join("-") + " => " + score;
+        console.log("score tested:", roll.join("-"), score);
+    }
 }
 
 var roll = [];
-function playRound(p) {
+function playRound(p, turnIndex) {
 
     function rollDie() {
         return Math.floor(Math.random() * 6) + 1;
     }
 
     function rollDice(dCount) {
-        if (hyperTrain) {
+        if (maxLuck) {
             roll = luckyRoll(dCount);
         }
         else {
@@ -159,19 +149,40 @@ function playRound(p) {
         var [score, rollRem] = scoreCard(rChoice);
         var epiGene = p.geneBank[roll.join("")];
 
-        if (debugPlay) console.log(p.name, roll.join("") + "x" + epiGene, "...", rChoice.join("-"), "=>", score, "(rem:", rollRem.length ? rollRem.join("-") : null, ")");
+        if (scoreTesting) submitScoreTesting(score);
 
-        // farkle? (or forfiet) 
-        if (score == 0)
-            return [0, 0]; //FARKLE
-
-        // if scored, how many dice are you re-rolling
         var reRoll = epiGene.split("").filter(g => g == "0").length; // re-roll: zero is a die intended to reroll
 
+        // farkle?
+        var farkle = score == 0;
+
+        // debug
+        var debugString = "";
+        if (debugPlay) debugString += p.name + " " + roll.join("") + "x" + epiGene + "->[" +
+            (!rChoice.length ? null : rChoice.join(",")) + "]=>" + score + " " + rollRem + "🗑 " + reRoll + "♻ ";
+
+        // punish? 
+        if (punishMode) { // punish missed scoring
+            var [maxScore, rollRem] = scoreCard(roll);
+            var punish = score - maxScore;
+            score += punish * punishScale;
+
+            if (debugPlay) debugString += "" + punish + " / " + maxScore;
+        }
+
+        // debug
+        if (debugPlay) console.log(debugString);
+
+        // farkle? (or forfiet) 
+        if (farkle) {
+            // if (debugPlay) console.log(p.name, "(((FARKLE)))", score);
+            return [0, score]; //FARKLE
+        }
+
         // if all dice scored, get 6 dice back (assumes re-roll on reset)
-        if (reRoll == 0 && rollRem.length == 0) { // reset case: all valid die reset roll
+        if (reRoll == 0 && rollRem == 0) { // reset case: all valid die reset roll
             reRoll = 6;
-            if (debugPlay) console.log(p.name, "~~BONUS~~")
+            if (debugPlay) console.log(p.name, "~~~BONUS~~~", score)
         }
 
         return [reRoll, score];
@@ -185,34 +196,36 @@ function playRound(p) {
 
         while (reRoll) {
             [reRoll, score] = play(reRoll);
-            if (score == 0) tableScore = 0;
-            else tableScore += score;
+            if (punishMode)
+                tableScore += score; // farkle can yield negative score
+            else
+                if (score == 0) tableScore = 0; // farkle yields 0 score
+                else tableScore += score; // normal points
         }
 
-        if (tableScore) {
-            p.score += tableScore; //end round
-            if (p.score >= winGoal) {
-                winner = p;
-            }
-        }
-        else {
-            if (debugPlay) console.log(p.name, "~~FARKLE~~");
-        }
+        if (debugPlay) console.log(p.name, "___ENDS TURN___", tableScore);
+
+        p.score += tableScore; //end round tally
+
+        if (p.score >= winGoal)
+            winner = p; // claim victory
+        else
+            if (punishMode)
+                if (Math.abs(p.score) >= winGoal)
+                    winner = p; // "winner" (slaughter rule activated)
     }
     turn();
-    if (debugPlay) debugger;
+    if (debugPlay) if (!turnIndex) debugger;
 }
 
 function playGame() {
     while (!winner)
         playerArr.forEach(playRound);
     printWinner(); // display results
-    updateAfterLifePlayers(winner); // nominate winner to afterLife
 }
 
 var epochCounter = 0;
 function epoch() {
-
 
     function greaterFitness(a, b) {
         if (a.score > b.score) return -1;
@@ -225,6 +238,15 @@ function epoch() {
 
     // score and scale
     playerArr = playerArr.sort(greaterFitness);
+
+    // nominate best in class to afterLife
+    if (playAfterLife)
+        updateAfterLifePlayers(playerArr[0]);
+
+    if (debugEpoch) {
+        console.table(playerArr);
+        debugger;
+    }
 
     // retain elite (winter cull)
     if (playerArr.length > cullThreshold) {
@@ -239,11 +261,10 @@ function epoch() {
 
     // royalty
     playerArr.push(playerArr[0].parent(playerArr[1]));
-    // playerArr.push(playerArr[0].parent(playerArr[2]));
-
-    // playerArr.push(playerArr[2].parent(playerArr[3]));
-    // playerArr.push(playerArr[4].parent(playerArr[5]));
-    // playerArr.push(playerArr[5].parent(playerArr[6]));
+    playerArr.push(playerArr[0].parent(playerArr[2]));
+    playerArr.push(playerArr[0].parent(playerArr[3]));
+    playerArr.push(playerArr[0].parent(playerArr[4]));
+    playerArr.push(playerArr[0].parent(playerArr[5]));
 
     // // 1st seed
     // playerArr.push(playerArr[0].parent(playerArr[rand(poolSize)]));
@@ -266,28 +287,35 @@ function epoch() {
 
 }
 
+// HALT button
+document.querySelector("#halt").addEventListener("click", function (e) {
+    console.log("HALTED");
+    halt = true;
+});
+
 // global
-var winGoal = 1000000; // game winning score
+var winGoal = 100000; // game winning score
 var winner = null;
-var fitnessGoal = 2; // win in how many rounds? 
+var fitnessGoal = 10; // win in how many rounds? 
 var mutationRate = 5; // out of 1000
 
 // players
 var gNamer = 65; // global name generator seed
 var playerArr = []; // gene pool
-var playerCount = 50; // init pop
-var cullThreshold = 500; // max pop size
+var playerCount = 150; // init pop
+var cullThreshold = 150; // max pop size
 var playAfterLife = true; // retain best players in localstorage
 var { updateAfterLifePlayers, getAfterLifePlayers } = afterLife();
 
-// hyper training
-var hyperTrain = true; //more accurately: basic understanding 
-var hyperFitness = 2500;
+// training
+var maxLuck = false;
+var punishMode = true; // (lower your winGoal)
+var punishScale = 2; // exaggerate punishment;
 
 // debug
 var halt = false;
 var debugPlay = false;
-var debugWinner = false;
+var debugEpoch = false;
 var scoreTesting = false;
 var scoreTestingArr = {
     49: false,
@@ -322,9 +350,6 @@ function stop() { // exit
         console.table(scoreTestingArr);
     }
 
-    if (hyperTrain) {
-        console.table("winner training score:", hyperTrainingScore(winner));
-    }
 }
 
 async function go() {
@@ -348,15 +373,6 @@ async function go() {
         }
     }
 
-    // hyperTraining override 
-    if (hyperTrain) {
-        var trainingScore = hyperTrainingBias(winner);
-        console.table("hyperTrainingBias:", trainingScore);
-        if (trainingScore < hyperFitness)
-            goAgain = true;
-        else
-            goAgain = false;
-    }
 
     // halting override
     if (halt)
@@ -365,12 +381,6 @@ async function go() {
     return goAgain;
 
 }
-
-// HALT button
-document.querySelector("#halt").addEventListener("click", function (e) {
-    console.log("HALTED");
-    halt = true;
-});
 
 async function init() {
     console.log("init()");
@@ -383,8 +393,9 @@ async function init() {
     // add afterlife player pool
     if (playAfterLife) {
         var afterLifePlayers = getAfterLifePlayers();
+        afterLifePlayers.push(preTrained());
         for (const playerID in afterLifePlayers) {
-            console.log("afterLifePlayer[" + playerID + "]", afterLifePlayers[playerID].name);
+            console.log("+ afterLifePlayer[" + playerID + "]", afterLifePlayers[playerID].name);
             playerArr.push(new Player(afterLifePlayers[playerID].name, afterLifePlayers[playerID].geneBank));
         }
     }
@@ -400,6 +411,5 @@ async function init() {
 
 }
 init();
-
 
 

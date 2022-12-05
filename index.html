@@ -17,14 +17,31 @@
 				position: fixed;
 				bottom: 20px;
 				left: 20px;
+
+				line-height: 1em;
 			}
 			td {
 				padding: 3px;
 				word-wrap: break-word;
 				max-width: 150px;
 			}
+
+			td.green:before {
+				content: "• ";
+				color: green;
+			}
+
+			td.red:before {
+				content: "• ";
+				color: red;
+			}
+
+			td.white:before {
+				content: "• ";
+			}
+
 			th {
-				padding: 5px 15px;
+				padding: 5px;
 				background-color: gray;
 				color: yellow;
 				position: sticky;
@@ -58,18 +75,26 @@
 			}
 
 			#genPop {
-				/* column-count: 5; */
-				column-width: 200px;
-				white-space: pre-wrap;
-				overflow-wrap: anywhere;
+				column-width: 150px;
+				font-size: 15px;
+				font-family: monospace;
 			}
 
 			#genPop span {
 				color: yellow;
+				border: 1px solid;
 			}
 
 			#pop {
 				position: fixed;
+				top: 75px;
+				right: 10px;
+				left: 420px;
+			}
+
+			#popH2 {
+				position: fixed;
+				text-align: left;
 				top: 10px;
 				right: 10px;
 				left: 420px;
@@ -80,8 +105,8 @@
 		<table id="winnersTable">
 			<tr>
 				<th>epoch:</th>
-				<th>name:</th>
-				<th>score:</th>
+				<th>winner:</th>
+				<th>avg score:</th>
 				<th>rounds:</th>
 			</tr>
 		</table>
@@ -96,7 +121,7 @@
 		<script src="player.js"></script>
 		<script src="render.js"></script>
 		<script src="afterLife.js"></script>
-		<script src="hyperTraining.js"></script>
+		<script src="luckyRoll.js"></script>
 		<script src="script.js"></script>
 	</body>
 </html>

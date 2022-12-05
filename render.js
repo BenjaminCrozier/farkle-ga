@@ -39,24 +39,43 @@ function renderPlayers() {
                 htmlString += p.name + "<br>";
         })
     div.innerHTML = htmlString;
+
+    // document.querySelector("#popH2").innerText = "population " + String.fromCodePoint(gNamer);
 }
 
+var culmWinngRounds = 0;
+var culmScore = 0;
 function printWinner() {
-    if (debugWinner) console.log("WINNER!", winner);
+
+    culmWinngRounds += winner.rounds;
+    var avgWinningRounds = Math.round(culmWinngRounds / (1 + epochCounter));
+
+    var avgScore = Math.round(playerArr.reduce((sum, player) => player.score + sum, 0) / playerArr.length);
+    culmScore += avgScore;
+    var avgAvgScore = Math.round(culmScore / (1 + epochCounter));
 
     function appendTable(obj) {
         var tr2 = el("tr", [], "");
         Object.keys(obj).forEach(key => {
-            tr2.appendChild(el("td", [], obj[key]));
+            var className = [];
+            if (key == "rounds") {
+                className.push("class");
+                className.push(obj[key] == avgWinningRounds ? "white" : obj[key] > avgWinningRounds ? "red" : "green");
+            }
+            if (key == "score") {
+                className.push("class");
+                className.push(avgScore == avgAvgScore ? "white" : avgScore < avgAvgScore ? "red" : "green");
+            }
+            tr2.appendChild(el("td", className, obj[key]));
         });
         table.appendChild(tr2);
     }
 
     var nav = {
-        "epoch:": epochCounter,
-        "name:": winner.name,
-        "score:": winner.score,
-        "rounds:": winner.rounds
+        "epoch": epochCounter,
+        "name": winner.name,
+        "score": avgScore,
+        "rounds": winner.rounds
     };
 
     // print
@@ -64,7 +83,4 @@ function printWinner() {
     appendTable(nav);
     renderPlayers();
     // renderWinnerDNA(winner);
-
-    // scroll
-    // window.scrollTo(0, document.body.scrollHeight);
 }
