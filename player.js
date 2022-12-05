@@ -8,24 +8,11 @@ class Player {
                 name = [...name][0] + String.fromCodePoint(gNamer++);
             else
                 name = String.fromCodePoint(gNamer++) + [...name][0];
-            // name = String.fromCharCode(gNamer++) + this.freqChar(name); //retain name with "most dna"
         }
         this.name = name ? name : String.fromCodePoint(gNamer++);
         this.rounds = 0;
-    }
-
-    freqChar(name) {
-        var nameTally = {};
-        [...name].forEach(c => nameTally[c] = nameTally[c] ? nameTally[c] + 1 : 1);
-        var maxValue = 0;
-        var maxChar = null;
-        for (const key in nameTally) {
-            if (maxValue < nameTally[key]) {
-                maxChar = key;
-                maxValue = nameTally[key];
-            }
-        }
-        return maxChar;
+        this.doom = false;
+        this.genomeLength = Object.keys(this.geneBank).length;
     }
 
     reset() {
@@ -43,8 +30,8 @@ class Player {
 
     makeNewEpiGene(r) {
         this.geneBank[r] = "";
-        for (let i = 0; i < r.length; i++)
-            this.geneBank[r] += this.maybe(50) ? "1" : "0";
+        while (this.geneBank[r].length < r.length)
+            this.geneBank[r] += "1"; //error on the side of no missed opertunity
     }
 
     splice(c, p, key) { //child/parent/key
@@ -56,8 +43,9 @@ class Player {
             }
             else if (this.maybe(50)) c = p; // 50/50 take (p)arent's gene
         }
-        else
+        else {
             c = p; // missing gene, take (p)arents
+        }
 
         // random mutation
         if (this.mutationChance()) {
@@ -66,17 +54,18 @@ class Player {
     }
 
     qSplice(geneBank) {
-        // Object.keys(geneBank).forEach((key) => this.splice(this.geneBank[key], geneBank[key], key));
         for (const key in geneBank) {
             this.splice(this.geneBank[key], geneBank[key], key)
         }
     }
 
     parent(p) {
-        var name = this.gender ? (this.name + p.name) : (p.name + this.name);
+        // var name = this.gender ? (this.name + p.name) : (p.name + this.name);
+        var name = this.name + p.name;
         var child = new Player(name);
         child.geneBank = structuredClone(this.geneBank);
         child.qSplice(p.geneBank); // splice parents
+        child.genomeLength = Object.keys(child.geneBank).length;
         return child;
     }
 
@@ -93,8 +82,10 @@ class Player {
     }
 
     chooseScore(r) {
-        if (!this.geneBank[r])
+        if (!this.geneBank[r]) {
             this.makeNewEpiGene(r);
+            this.genomeLength += 1;
+        }
 
         var epiGene = this.geneBank[r];
         var choice = [];
