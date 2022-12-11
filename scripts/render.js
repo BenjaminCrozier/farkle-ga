@@ -33,13 +33,15 @@ function renderPlayers() {
     playerArr
         .sort(compare)
         .forEach(p => {
-            if (p.name == winner.name)
+            if (p.score == winner.score)
                 htmlString += "<span>" + p.name + "</span><br>";
             else
                 htmlString += p.name + "<br>";
         })
-    div.innerHTML = htmlString;
 
+    requestAnimationFrame(() => div.innerHTML = htmlString);
+
+    // document.querySelector("#popH2").innerText = "population " + "💀" + " " + punishScale;
     // document.querySelector("#popH2").innerText = "population " + String.fromCodePoint(gNamer);
 }
 
@@ -68,7 +70,7 @@ function printWinner() {
             }
             tr2.appendChild(el("td", className, obj[key]));
         });
-        table.appendChild(tr2);
+        requestAnimationFrame(() => table.appendChild(tr2));
     }
 
     var nav = {

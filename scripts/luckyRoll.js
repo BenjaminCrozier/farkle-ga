@@ -1,7 +1,11 @@
 function luckyRoll(dCount) {
 
+    function rand(max) {
+        return Math.floor(Math.random() * max);
+    }
+
     function rollDie() {
-        return Math.floor(Math.random() * 6) + 1;
+        return rand(6) + 1;;
     }
 
     function spareDie(c) {

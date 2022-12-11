@@ -22,6 +22,7 @@ function afterLife() {
                 if (afterLifeIndex.length > 10) {
                     localStorage.clear();
                     afterLifeIndex = [];
+                    console.warn("afterLifeIndex: localStorage.clear()");
                 }
                 afterLifeIndex.push(now);
                 todaysIndex = true;

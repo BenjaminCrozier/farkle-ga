@@ -1,18 +1,30 @@
+var gNamer = 65; // global name generator seed
+function getNewName() {
+    if (gNamer > 1114111)
+        gNamer = 56;
+    return String.fromCodePoint(gNamer++);
+}
 class Player {
-    constructor(name, geneBank) {
+    constructor(name = "", geneBank) {
         this.score = 0;
         this.geneBank = geneBank ? geneBank : {};
         this.gender = this.maybe(50);
-        if (name?.length > 10) {
-            if (this.gender)
-                name = [...name][0] + String.fromCodePoint(gNamer++);
-            else
-                name = String.fromCodePoint(gNamer++) + [...name][0];
+        if (name?.length > 3) {
+            name = name.substring(0, 3);
+            // if (this.gender)
+            //     name = [...name][0] + getNewName();
+            // else
+            //     name = getNewName() + [...name][0];
+            // name = "" + [...name][0] + [...name][name.length - 1];
         }
-        this.name = name ? name : String.fromCodePoint(gNamer++);
+        this.name = getNewName() + name;
         this.rounds = 0;
-        this.doom = false;
+        if (punishMode) this.doom = false;
         this.genomeLength = Object.keys(this.geneBank).length;
+        this.gamesPlayed = 0;
+        this.gamesWon = 0;
+        this.culmScore = 0;
+        this.avgScore = 0;
     }
 
     reset() {
@@ -24,6 +36,10 @@ class Player {
         return Math.floor(Math.random() * 100) < chance;
     }
 
+    rand(max) {
+        return Math.floor(Math.random() * max);
+    }
+
     mutationChance() {
         return Math.floor(Math.random() * 1000) < mutationRate;
     }
@@ -31,26 +47,28 @@ class Player {
     makeNewEpiGene(r) {
         this.geneBank[r] = "";
         while (this.geneBank[r].length < r.length)
-            this.geneBank[r] += "1"; //error on the side of no missed opertunity
+            this.geneBank[r] += this.mutationChance() ? "0" : "1";
     }
 
     splice(c, p, key) { //child/parent/key
         if (c) {
-            if (c == p) {
-                if (this.mutationChance()) {
-                    this.geneBank[key] = this.mutate(c); // (c)hild shares gene: maybe() mutate it
-                }
+            if (c == p) { // (c)hild shares gene: maybe() mutate it
+                if (this.gender) // male heir -> mutate 
+                    if (this.mutationChance())
+                        this.geneBank[key] = this.makeNewEpiGene(key);
             }
-            else if (this.maybe(50)) c = p; // 50/50 take (p)arent's gene
+            else
+                if (!this.gender) // female -> perfect clone
+                    if (this.maybe(50)) c = p; // 50/50 take (p)arent's gene
         }
         else {
             c = p; // missing gene, take (p)arents
         }
 
         // random mutation
-        if (this.mutationChance()) {
-            this.geneBank[key] = this.mutate(c); // random mutations
-        }
+        // if (this.mutationChance()) {
+        //     this.geneBank[key] = this.mutate(c); // random mutations
+        // }
     }
 
     qSplice(geneBank) {
@@ -59,10 +77,15 @@ class Player {
         }
     }
 
-    parent(p) {
-        // var name = this.gender ? (this.name + p.name) : (p.name + this.name);
-        var name = this.name + p.name;
-        var child = new Player(name);
+    parent(p, title = false) {
+        var child = new Player(this.name);
+        if (title == "royal")
+            child.name += child.gender ? "🤴" : "👸";
+        if (title == "genome")
+            child.name += "🧬";
+        if (title == "perineal")
+            child.name += "👑";
+
         child.geneBank = structuredClone(this.geneBank);
         child.qSplice(p.geneBank); // splice parents
         child.genomeLength = Object.keys(child.geneBank).length;
@@ -70,7 +93,7 @@ class Player {
     }
 
     mutate(gene) {
-        var x = rand(gene.length);
+        var x = this.rand(gene.length);
         return gene
             .split("")
             .map((g, i) => {
