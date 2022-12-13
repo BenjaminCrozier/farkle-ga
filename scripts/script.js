@@ -16,7 +16,7 @@ var { updateAfterLifePlayers, getAfterLifePlayers } = afterLife();
 var maxLuck = false;
 var punishMode = false; // (lower your winGoal)
 var punishScale = 1; // exaggerate punishment;
-var completeGenome = 15624;
+var completeGenome = 923;
 
 // debug
 var debugPlay = false;
@@ -124,10 +124,6 @@ function oneOff() {
 
 async function init() {
     console.log("init()");
-
-
-    return oneOff();
-
 
     // player pool
     for (var i = 0; i < playerCount; i++) {
