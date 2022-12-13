@@ -19,7 +19,8 @@ because the dice are sorted small to large the number of genome-object keys is s
 
 a segment of a player's genome object may look as follows: 
 
-`{
+```
+{
     ...
     "4444": "1011",
     "4445": "1110",
@@ -31,7 +32,8 @@ a segment of a player's genome object may look as follows:
     "111123": "111111",
     "111124": "100110",
     ...
-}`
+}
+```
 
 Note: this algorithm does not include any logic for decision making among players to find the most optimal play. Players are allowed to ignore any and all "point bearing" dice and even forfeit their turn. 
 
