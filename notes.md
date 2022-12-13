@@ -1,4 +1,4 @@
-12/4/22   
+## 12/4/22   
 the evolution of the player pool is stagnating. 
 
 I believe the number of genes being exchanged is greater than the number of instances in which those genes are initiated and therefore the evolution of the pool is stalled. 
@@ -17,7 +17,7 @@ Changed the makeNewEpiGene() to 1's by default. This keeps players from violatin
 added functions to fill in the pool when there is a population collapse. Still not sure why that's happening. 
 
 
-12/5/22   
+## 12/5/22   
 investigating the population crash phenomenon 
 
 ***
@@ -43,7 +43,7 @@ I had a hunch that makeNewEpiGene was too opinionated towards safety! I am vindi
 genome growth is now slow but steady...
 
 
-12/6/22   
+## 12/6/22   
 growth was capped at 575 after several hours. the pool now exclusively plays 1 round only. in hindsight it's obvious that if only one DNA pair is mutated the result is a dangerous re-roll that voids all points. 
 
 interesting note: once the pool hit 575, the chromosome pool was completely homogeneous. everybody's epigenome read "111111": the safest play when rerolling a single dice could void your score completely.  
@@ -114,7 +114,7 @@ This game also has the interesting caveat of changing the more people are playin
 gene pool is stagnating at 890 genome length. nowhere near the 46,656 needed for a complete genome. 
 
 
-12/11/2022   
+## 12/11/2022   
 Apparently, the actualy number of permutations for six dice is 462. This is derived from a binomial coefficient of $\binom{11}{6}$. 
 
 given we're combining combinations 1-6: 
