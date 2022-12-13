@@ -1,4 +1,4 @@
-12/4/22
+12/4/22   
 the evolution of the player pool is stagnating. 
 
 I believe the number of genes being exchanged is greater than the number of instances in which those genes are initiated and therefore the evolution of the pool is stalled. 
@@ -9,7 +9,7 @@ too many genes are dormant for too many generations and are traded away before t
 
 punishing the fitness scores of players does not seem to be effective in removing bad genes from the pool. I will try a more toxic approach that removes players completely for bad expression. Will also device a test for my theory about dormant gene. 
 
-============
+***
 
 created a zero tolerance policy (player.doom) for objectively suboptimal scoring (leaving points on the table). 
 this policy would eliminate any bad genes from propagating. It also seems to create population crashes I can't quite account for. 
@@ -17,20 +17,20 @@ Changed the makeNewEpiGene() to 1's by default. This keeps players from violatin
 added functions to fill in the pool when there is a population collapse. Still not sure why that's happening. 
 
 
-12/5/22
+12/5/22   
 investigating the population crash phenomenon 
 
-============
+***
 
 even with aggressive punishment (instant death) children have genomes with sub-optimal plays because of natural mutations in the "birthing" process. These can exist for several generations before they're expressed and kill the player/child: thus deadly genes can still propagate within a population. 
 
 Is this a common problem in genetic algorithms? is every gene suppose to be expressed in every epoch? dormant mutated genes seem very problematic, perhaps i need a larger population... This would require a more efficient geneBank, or migrating this project to node.js...
 
-============
+***
 
 avg genome length is stalled. players with genes longer than 700 are rare and my target is 15625. player genomes should be growing exponentially every generation as their genese coalise, every new generation should be gaining the genes of rolls from both parents. no generations genome should be shorter than their parents. This must be the population collapse that's preventing elongation. 
 
-============
+***
 
 reworking the naming/heritage system yields insight. a player is only able to risk their narrow set of mutated born genes. in every new scenario they "play it safe" with the default epigenome of '1's. this insures a constant churn new DNA... 
 
@@ -43,20 +43,20 @@ I had a hunch that makeNewEpiGene was too opinionated towards safety! I am vindi
 genome growth is now slow but steady...
 
 
-12/6/22
+12/6/22   
 growth was capped at 575 after several hours. the pool now exclusively plays 1 round only. in hindsight it's obvious that if only one DNA pair is mutated the result is a dangerous re-roll that voids all points. 
 
 interesting note: once the pool hit 575, the chromosome pool was completely homogeneous. everybody's epigenome read "111111": the safest play when rerolling a single dice could void your score completely.  
 
 the mutation rate on an new expressing genome must be significantly higher and must affect more than one pair. 
 
-============
+***
 
 mutating a single pair in a gene is always more dangerous that it's worth. mutating 1 pair means your forcing a single die reroll which is a 66% chance of farkle. 
 
 total gene mutation is required. 
 
-============
+***
 
 removing doom mechanic and replacing it with a cull for negative scores and a scaling punishment per epoch. doom mechanic is just too punishing and does not allow allow for players to survive to 2nd rounds plays which are nessicity for genome growth. (local maxima; safe play: simply play the first round and do not engage in a second round)
 
@@ -66,7 +66,7 @@ but if the model can't sufficiently punish suboptimal play, how can it evolve up
 
 a toxic gene cannot be allowed to survive a single generation. doom re-instated. 
 
-============
+***
 
 punish mechanic is inherently flawed, choosing to re-roll 1' and 5's is a completely valid choice. this creates a problem of leaving big wins on the table in the form of 6x dice... hopefully cream will rise to the top. 
 
@@ -93,17 +93,17 @@ There's also an element of luck that might not be accounted for. a player with g
 
 perhaps a schema where exogamous exact female clones of male fathers carry on good genomes and do not remix with family (lowering mutation rate) and maintaining the genome's legacy. I like that this mirrors nature could possibly bridge the luck chasm...
 
-============
+***
 
 female players are perfect clones of their parent. hopefully this creates a greater half-life for winningest genomes. As parents age and mutate each round, a second chance to add better DNA to their genome exists in their daughters.
 
-============
+***
 
 changing the fitness cull to avg score, rather than recent score, has radically improve this mode on every metric. 
 
 in hindsight, a cumulative punish score would have worked better as well. 
 
-============
+***
 
 ...there are 46,656 different combinations of rolling 6 dice, suggesting 2,176,992,736,656 roll attempts to hit every combination and considerably more to evolve this model...  This model would require hitting each combination multiple times to compare/evolve. 
 
@@ -114,8 +114,7 @@ This game also has the interesting caveat of changing the more people are playin
 gene pool is stagnating at 890 genome length. nowhere near the 46,656 needed for a complete genome. 
 
 
-12/11/2022
-
+12/11/2022   
 Apparently, the actualy number of permutations for six dice is 462. This is derived from a binomial coefficient of $\binom{11}{6}$. 
 
 given we're combining combinations 1-6: 
@@ -126,7 +125,7 @@ $\binom{11}{6}$ + $\binom{10}{5}$ + $\binom{9}{4}$ + $\binom{8}{3}$ + $\binom{7}
 
 which is a much more managageble genome! and also a better match for the genome lengths found. 
 
-============
+***
 
 attempted to create a complete genome by itteratting in base 6: 1-46656. (ref: `oneOff()`)
 I assumed this would encompass all possible combination of dice, converting the number to a set of dice: 
