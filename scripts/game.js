@@ -17,12 +17,11 @@ function playRound(p, turnIndex) {
                 roll[i] = rollDie();
             }
         }
-        roll = roll.sort();
     }
 
     function play(dCount) {
         rollDice(dCount); // roll the global dice
-        var rChoice = p.chooseScore(roll.join(""));
+        var rChoice = p.chooseScore(roll);
         var [score, rollRem] = scoreCard(rChoice);
         var epiGene = p.geneBank[roll.join("")];
 

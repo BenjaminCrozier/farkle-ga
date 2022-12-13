@@ -25,6 +25,7 @@ class Player {
         this.gamesWon = 0;
         this.culmScore = 0;
         this.avgScore = 0;
+        this.punish = 0;
     }
 
     reset() {
@@ -84,7 +85,7 @@ class Player {
         if (title == "genome")
             child.name += "🧬";
         if (title == "perineal")
-            child.name += "👑";
+            child.name += "💪";
 
         child.geneBank = structuredClone(this.geneBank);
         child.qSplice(p.geneBank); // splice parents
@@ -104,7 +105,8 @@ class Player {
             }).join("");
     }
 
-    chooseScore(r) {
+    chooseScore(roll) {
+        var r = roll.sort().join("");
         if (!this.geneBank[r]) {
             this.makeNewEpiGene(r);
             this.genomeLength += 1;

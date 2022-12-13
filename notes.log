@@ -112,3 +112,29 @@ this may not have been a good use case for a brute-force approach to a genetic a
 This game also has the interesting caveat of changing the more people are playing. even though the genomes are not very good at the game, simply by having so many of them playing one is bound to reach the 10k finish-line in less than 10 rounds by sheer luck alone. You would likely beat any 1 genome on it's own, but as a collective they will hog all the luck and beat you. 
 
 gene pool is stagnating at 890 genome length. nowhere near the 46,656 needed for a complete genome. 
+
+
+12/11/2022
+
+Apparently, the actualy number of permutations for six dice is 462. This is derived from a binomial coefficient of $\binom{11}{6}$. 
+
+given we're combining combinations 1-6: 
+
+$\binom{11}{6}$ + $\binom{10}{5}$ + $\binom{9}{4}$ + $\binom{8}{3}$ + $\binom{7}{2}$ + $\binom{6}{1}$
+= 462 + 252 + 126 + 56 + 21 + 6
+= 923
+
+which is a much more managageble genome! and also a better match for the genome lengths found. 
+
+============
+
+attempted to create a complete genome by itteratting in base 6: 1-46656. (ref: `oneOff()`)
+I assumed this would encompass all possible combination of dice, converting the number to a set of dice: 
+`f(n)=6-n: 11=>[5,5], 554=>[1,1,2]` 
+however this fails to include double zeros, as we do not count 98-99-00-100. the base 6 conversion of 1-46656 very nearly approximates all possible combinations of 6 dice, it fails to describe the set of all 6's (or 1's, depending on your bijection/conversion), so 666666, 66666, 6666, 666, and 66 are missing. note, 0 (6), is not missing. No doubt some fantastic mathmatical rule or formula is behind this.
+
+
+
+
+
+

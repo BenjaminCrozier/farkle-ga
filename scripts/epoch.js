@@ -39,14 +39,9 @@ function genomeFitness() {
         maxGenome = sorted[0].genomeLength;
     }
 
-    // nominate longest genome to afterLife
-    // if (playAfterLife)
-    //     updateAfterLifePlayers(playerArr[0]);
-
     var gArr = [];
-    for (let i = 0; i < Math.floor(sorted.length / 10); i++) {
-        // playerArr.push(playerArr[0].parent(playerArr[i], "royal"));
-        gArr.push(sorted[0].parent(sorted[i], "genome")); // propagate longest genome
+    for (let i = 0; i < Math.floor(sorted.length / 100); i++) {
+        gArr.push(sorted[0].parent(sorted[i], "genome")); // propagate
     }
 
     return gArr;
@@ -55,27 +50,24 @@ function genomeFitness() {
 
 function perinealFitness() {
 
-    // sort by genome length
+    // sort by history of success
     function greaterHistory(a, b) {
         if (a.avgScore > b.avgScore) return -1;
         if (a.avgScore < b.avgScore) return 1;
         return 0;
     }
-    var sorted = playerArr.sort(greaterHistory); // sort by genome length
+    var sorted = playerArr.sort(greaterHistory); // sort by 
 
-    // nominate best in class to afterLife
+    // nominate to afterLife
     if (playAfterLife)
         updateAfterLifePlayers(sorted[0]);
         
     var pArr = [];
-    for (let i = 0; i < Math.floor(sorted.length / 10); i++) {
-        // playerArr.push(playerArr[0].parent(playerArr[i], "royal"));
-        pArr.push(sorted[0].parent(sorted[i], "perineal")); // propagate longest genome
+    for (let i = 0; i < Math.floor(sorted.length / 5); i++) {
+        pArr.push(sorted[0].parent(sorted[i], "perineal")); // propagate 
     }
 
-
     return pArr;
-
 }
 
 function punishFitness() {

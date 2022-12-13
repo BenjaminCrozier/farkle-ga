@@ -93,8 +93,41 @@ async function go() {
 
 }
 
+function oneOff() {
+
+    var x = new Player();
+
+    for (let i = 0; i < 46656; i++) {
+        var roll = i.toString(6).split("").map(d => 6 - parseInt(d));
+
+        var rChoice = x.chooseScore(roll);
+        var [score, rollRem] = scoreCard(rChoice);
+
+        var [maxScore, rollRem] = scoreCard(roll);
+        var punish = score - maxScore;
+
+        console.log(i, i.toString(6) + "=>" + roll.sort().join(""), score);
+
+        x.score += score;
+        x.punish += punish;
+    }
+    console.log(x);
+
+    // tally by chromosome
+    var chromosomes = [0, 0, 0, 0, 0, 0];
+    for (const key in x.geneBank) {
+        chromosomes[key.length - 1]++;
+    }
+    console.table(chromosomes);
+
+}
+
 async function init() {
     console.log("init()");
+
+
+    return oneOff();
+
 
     // player pool
     for (var i = 0; i < playerCount; i++) {
