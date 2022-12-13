@@ -5,7 +5,7 @@ I believe the number of genes being exchanged is greater than the number of inst
 
 The number of genes activated in a given game is less than the number of genes exchanged each epoch. I suspect evolution is stalled because the player's fitness per game is described with a minority of a players genes, while a greater majority of genes are exchanged each generation. No generation can make meaningful progress (in the evolution of their genes) because the bulk of their genes go untested for multiple generations. 
 
-too many genes are dormant for too many generations and are traded away before they can be expressed to impact the players fitness. each player has the capacity to carry too many bad dormant genes for too long before their expression hurts the player. in the interum they've tainted the genepool, there is too much opportunity for good genes to be lost in a shuffle of mediocre players surviving by chance. perhaps a more sever reaction to poor gene expression; removing the player from the pool, will ensure poor genes are no longer intermixing.
+too many genes are dormant for too many generations and are traded away before they can be expressed to impact the players fitness. each player has the capacity to carry too many bad dormant genes for too long before their expression hurts the player. in the interim they've tainted the gene pool, there is too much opportunity for good genes to be lost in a shuffle of mediocre players surviving by chance. perhaps a more sever reaction to poor gene expression; removing the player from the pool, will ensure poor genes are no longer intermixing.
 
 punishing the fitness scores of players does not seem to be effective in removing bad genes from the pool. I will try a more toxic approach that removes players completely for bad expression. Will also device a test for my theory about dormant gene. 
 
@@ -28,11 +28,11 @@ Is this a common problem in genetic algorithms? is every gene suppose to be expr
 
 ***
 
-avg genome length is stalled. players with genes longer than 700 are rare and my target is 15625. player genomes should be growing exponentially every generation as their genese coalise, every new generation should be gaining the genes of rolls from both parents. no generations genome should be shorter than their parents. This must be the population collapse that's preventing elongation. 
+avg genome length is stalled. players with genes longer than 700 are rare and my target is 15625. player genomes should be growing exponentially every generation as their genes coalesce, every new generation should be gaining the genes of rolls from both parents. no generations genome should be shorter than their parents. This must be the population collapse that's preventing elongation. 
 
 ***
 
-reworking the naming/heritage system yields insight. a player is only able to risk their narrow set of mutated born genes. in every new scenario they "play it safe" with the default epigenome of '1's. this insures a constant churn new DNA... 
+reworking the naming/heritage system yields insight. a player is only able to risk their narrow set of mutated born genes. in every new scenario they "play it safe" with the default epi-genome of '1's. this insures a constant churn new DNA... 
 
 reduced the birthrate of royalty, new heritage emoji reveals redundant DNA with too large a litter. 
 
@@ -46,7 +46,7 @@ genome growth is now slow but steady...
 ## 12/6/22   
 growth was capped at 575 after several hours. the pool now exclusively plays 1 round only. in hindsight it's obvious that if only one DNA pair is mutated the result is a dangerous re-roll that voids all points. 
 
-interesting note: once the pool hit 575, the chromosome pool was completely homogeneous. everybody's epigenome read "111111": the safest play when rerolling a single dice could void your score completely.  
+interesting note: once the pool hit 575, the chromosome pool was completely homogeneous. everybody's epi-genome read "111111": the safest play when rerolling a single dice could void your score completely.  
 
 the mutation rate on an new expressing genome must be significantly higher and must affect more than one pair. 
 
@@ -58,11 +58,11 @@ total gene mutation is required.
 
 ***
 
-removing doom mechanic and replacing it with a cull for negative scores and a scaling punishment per epoch. doom mechanic is just too punishing and does not allow allow for players to survive to 2nd rounds plays which are nessicity for genome growth. (local maxima; safe play: simply play the first round and do not engage in a second round)
+removing doom mechanic and replacing it with a cull for negative scores and a scaling punishment per epoch. doom mechanic is just too punishing and does not allow allow for players to survive to 2nd rounds plays which are necessity for genome growth. (local maxima; safe play: simply play the first round and do not engage in a second round)
 
-however, when allowed to survive, bad dormant genes spread quickly and create population collapse in later rounds with greater scale punishment... a punish scale of greater than 4 causes population collapse and the genepool average score is trending negative... perhaps allowing non-optimal dice play should never be allowed... 
+however, when allowed to survive, bad dormant genes spread quickly and create population collapse in later rounds with greater scale punishment... a punish scale of greater than 4 causes population collapse and the gene-pool average score is trending negative... perhaps allowing non-optimal dice play should never be allowed... 
 
-but if the model can't sufficiently punish suboptimal play, how can it evolve upward and determine optimal play? the model lacks boyancy, punishing suboptimal play shouldn't be required, it should determine suboptimal play on it's own and punish accordingly...
+but if the model can't sufficiently punish suboptimal play, how can it evolve upward and determine optimal play? the model lacks buoyancy, punishing suboptimal play shouldn't be required, it should determine suboptimal play on it's own and punish accordingly...
 
 a toxic gene cannot be allowed to survive a single generation. doom re-instated. 
 
@@ -87,7 +87,7 @@ this represents every possible OUTCOME for a given roll, followed by a choice.
 * choose [null] (pass with no points)
 * choose complete reroll [6]
 
-this logic IS  captured with the schema 123456x111111 (player cashes in on a straight) but deviation from this epigenome (111111) is not punished immediately, and in a backwater genepool can be widely spread; discarding an otherwise great gene. 
+this logic IS  captured with the schema 123456x111111 (player cashes in on a straight) but deviation from this epi-genome (111111) is not punished immediately, and in a backwater gene-pool can be widely spread; discarding an otherwise great gene. 
 
 There's also an element of luck that might not be accounted for. a player with great genes might fall victim to several unlucky rolls and become removed from the gene pool entirely as a result.
 
@@ -95,7 +95,7 @@ perhaps a schema where exogamous exact female clones of male fathers carry on go
 
 ***
 
-female players are perfect clones of their parent. hopefully this creates a greater half-life for winningest genomes. As parents age and mutate each round, a second chance to add better DNA to their genome exists in their daughters.
+female players are perfect clones of their parent. hopefully this creates a greater half-life for winning-est genomes. As parents age and mutate each round, a second chance to add better DNA to their genome exists in their daughters.
 
 ***
 
@@ -115,7 +115,7 @@ gene pool is stagnating at 890 genome length. nowhere near the 46,656 needed for
 
 
 ## 12/11/2022   
-Apparently, the actualy number of permutations for six dice is 462. This is derived from a binomial coefficient of $\binom{11}{6}$. 
+Apparently, the actually number of permutations for six dice is 462. This is derived from a binomial coefficient of $\binom{11}{6}$. 
 
 given we're combining combinations 1-6: 
 
@@ -123,14 +123,14 @@ $\binom{11}{6}$ + $\binom{10}{5}$ + $\binom{9}{4}$ + $\binom{8}{3}$ + $\binom{7}
 = 462 + 252 + 126 + 56 + 21 + 6
 = 923
 
-which is a much more managageble genome! and also a better match for the genome lengths found. 
+which is a much more manageable genome! and also a better match for the genome lengths found. 
 
 ***
 
-attempted to create a complete genome by itteratting in base 6: 1-46656. (ref: `oneOff()`)
+attempted to create a complete genome by interacting in base 6: 1-46656. (ref: `oneOff()`)
 I assumed this would encompass all possible combination of dice, converting the number to a set of dice: 
 `f(n)=6-n: 11=>[5,5], 554=>[1,1,2]` 
-however this fails to include double zeros, as we do not count 98-99-00-100. the base 6 conversion of 1-46656 very nearly approximates all possible combinations of 6 dice, it fails to describe the set of all 6's (or 1's, depending on your bijection/conversion), so 666666, 66666, 6666, 666, and 66 are missing. note, 0 (6), is not missing. No doubt some fantastic mathmatical rule or formula is behind this.
+however this fails to include double zeros, as we do not count 98-99-00-100. the base 6 conversion of 1-46656 very nearly approximates all possible combinations of 6 dice, it fails to describe the set of all 6's (or 1's, depending on your bijection/conversion), so 666666, 66666, 6666, 666, and 66 are missing. note, 0 (6), is not missing. No doubt some fantastic mathematical rule or formula is behind this.
 
 
 
