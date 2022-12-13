@@ -51,30 +51,20 @@ class Player {
             this.geneBank[r] += this.mutationChance() ? "0" : "1";
     }
 
-    splice(c, p, key) { //child/parent/key
-        if (c) {
-            if (c == p) { // (c)hild shares gene: maybe() mutate it
-                if (this.gender) // male heir -> mutate 
+    splice(geneBank) {
+        for (const key in geneBank) {
+            // this.splice(this.geneBank[key], geneBank[key], key)
+            if (this.geneBank[key]) { // new gene?
+                if (this.gender && this.geneBank[key] === geneBank[key]) { //identical gene and male? 
                     if (this.mutationChance())
-                        this.geneBank[key] = this.makeNewEpiGene(key);
+                        this.geneBank[key] = this.makeNewEpiGene(key); // maybe mutate it
+                }
+                else
+                    if (this.maybe(50))
+                        this.geneBank[key] = geneBank[key]; // 50/50 take (p)arent's gene
             }
             else
-                if (!this.gender) // female -> perfect clone
-                    if (this.maybe(50)) c = p; // 50/50 take (p)arent's gene
-        }
-        else {
-            c = p; // missing gene, take (p)arents
-        }
-
-        // random mutation
-        // if (this.mutationChance()) {
-        //     this.geneBank[key] = this.mutate(c); // random mutations
-        // }
-    }
-
-    qSplice(geneBank) {
-        for (const key in geneBank) {
-            this.splice(this.geneBank[key], geneBank[key], key)
+                this.geneBank[key] = geneBank[key]; // missing gene, take (p)arents
         }
     }
 
@@ -84,11 +74,11 @@ class Player {
             child.name += child.gender ? "🤴" : "👸";
         if (title == "genome")
             child.name += "🧬";
-        if (title == "perineal")
-            child.name += "💪";
+        if (title == "perennial")
+            child.name += child.gender ? "🏋️‍♂️" : "🏋️‍♀️";
 
         child.geneBank = structuredClone(this.geneBank);
-        child.qSplice(p.geneBank); // splice parents
+        child.splice(p.geneBank); // splice parents
         child.genomeLength = Object.keys(child.geneBank).length;
         return child;
     }

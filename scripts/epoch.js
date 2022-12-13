@@ -1,8 +1,8 @@
-function scoreFitness() {
+// function rand(max) {
+//     return Math.floor(Math.random() * max);
+// }
 
-    function rand(max) {
-        return Math.floor(Math.random() * max);
-    }
+function scoreFitness() {
 
     function greaterFitness(a, b) {
         if (a.score > b.score) return -1;
@@ -48,7 +48,7 @@ function genomeFitness() {
 
 }
 
-function perinealFitness() {
+function perennialFitness() {
 
     // sort by history of success
     function greaterHistory(a, b) {
@@ -61,10 +61,10 @@ function perinealFitness() {
     // nominate to afterLife
     if (playAfterLife)
         updateAfterLifePlayers(sorted[0]);
-        
+
     var pArr = [];
     for (let i = 0; i < Math.floor(sorted.length / 5); i++) {
-        pArr.push(sorted[0].parent(sorted[i], "perineal")); // propagate 
+        pArr.push(sorted[0].parent(sorted[i], "perennial")); // propagate 
     }
 
     return pArr;
@@ -110,13 +110,13 @@ function epoch() {
     // new epoch
     epochCounter++;
     winner.gamesWon++;
-    
+
     // update player stats
     playerArr.forEach((p) => {
         p.gamesPlayed++; // increment game counter
         p.avgScore = p.culmScore / p.gamesPlayed; // get avg wins
     });
-    
+
     // sort by genome length
     function greaterHistory(a, b) {
         if (a.avgScore > b.avgScore) return -1;
@@ -127,7 +127,7 @@ function epoch() {
     playerArr = playerArr.sort(greaterHistory); // sort by genome length
     // console.table(playerArr);
     // debugger;
-    
+
     // // sort by score
     // playerArr = playerArr.sort((a, b) => {
     //     if (a.score > b.score) return -1;
@@ -146,8 +146,8 @@ function epoch() {
     //rank and propagate by genome fitness (length)
     var genomeChildren = genomeFitness();
 
-    //rank and propagate by perineal  fitness
-    var legacyChildren = perinealFitness();
+    //rank and propagate by perennial  fitness
+    var legacyChildren = perennialFitness();
 
     // playerArr = punishFitness();
 
