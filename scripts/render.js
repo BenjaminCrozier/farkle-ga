@@ -48,7 +48,7 @@ function renderPlayers() {
 var culmWinngRounds = 0;
 var culmScore = 0;
 function printWinner() {
-
+    
     culmWinngRounds += winner.rounds;
     var avgWinningRounds = Math.round(culmWinngRounds / (1 + epochCounter));
 
