@@ -29,7 +29,7 @@ function playRound(p, turnIndex) {
         if (scoreTesting) {
             if (scoreTestingArr[score] === false) {
                 scoreTestingArr[score] = roll.join("-") + " => " + score;
-                console.log("score tested:", roll.join("-"), score);
+                console.log("score tested:", p.name, roll.join("-"), score);
             }
         }
 

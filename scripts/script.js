@@ -17,7 +17,7 @@ var punishScale = 1; // exaggerate punishment;
 var completeGenome = 923; //should be longest possible genome
 
 // goal
-var fitnessGoal = 5; // win how many games? 
+var fitnessGoal = 10; // win how many games? 
 
 // debug
 var debugPlay = false;
@@ -53,6 +53,9 @@ function stop() { // exit
     console.log("WINNER!");
     console.log(winner);
 
+    // nominate to afterLife
+    if (playAfterLife) updateAfterLifePlayers(playerArr[0]);
+
     // log on halt
     if (halt) {
         console.warn("HALTED");
@@ -63,6 +66,10 @@ function stop() { // exit
         console.log("TEST COMPLETE!");
         console.table(scoreTestingArr);
     }
+    
+    var mp3_url = './music.mp3';
+    (new Audio(mp3_url)).play()
+
 }
 
 async function go() {
@@ -84,6 +91,7 @@ async function go() {
             if (!scoreTestingArr[score])
                 goAgain = true;
         }
+
     }
 
     // halting override
