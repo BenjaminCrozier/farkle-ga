@@ -1,11 +1,10 @@
 // game
 var winGoal = 10000; // game winning score
 var winner = null;
-var fitnessGoal = 0; // win in how many rounds? 
+var fitnessGoal = 1; // win in how many rounds? 
 var mutationRate = 160; // out of 1000
 
 // players
-
 var playerArr = []; // gene pool
 var playerCount = 256; // init pop
 var playAfterLife = true; // retain best players in localstorage
@@ -16,7 +15,7 @@ var { updateAfterLifePlayers, getAfterLifePlayers } = afterLife();
 var maxLuck = false;
 var punishMode = false; // (lower your winGoal)
 var punishScale = 1; // exaggerate punishment;
-var completeGenome = 923;
+var completeGenome = 923; //should be longest possible genome
 
 // debug
 var debugPlay = false;

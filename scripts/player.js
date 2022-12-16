@@ -20,7 +20,7 @@ class Player {
         this.name = getNewName() + name;
         this.rounds = 0;
         if (punishMode) this.doom = false;
-        this.genomeLength = Object.keys(this.geneBank).length;
+        this.genomeLength = 0;
         this.gamesPlayed = 0;
         this.gamesWon = 0;
         this.culmScore = 0;
@@ -56,15 +56,21 @@ class Player {
             // this.splice(this.geneBank[key], geneBank[key], key)
             if (this.geneBank[key]) { // new gene?
                 if (this.gender && this.geneBank[key] === geneBank[key]) { //identical gene and male? 
-                    if (this.mutationChance())
-                        this.geneBank[key] = this.makeNewEpiGene(key); // maybe mutate it
+                    if (this.mutationChance()) {
+                        this.makeNewEpiGene(key); // maybe mutate it
+                    }
                 }
                 else
-                    if (this.maybe(50))
-                        this.geneBank[key] = geneBank[key]; // 50/50 take (p)arent's gene
+                    if (this.maybe(50)) {
+                        this.geneBank[key] = geneBank[key]; // 50/50 take parent's gene
+                    }
             }
-            else
-                this.geneBank[key] = geneBank[key]; // missing gene, take (p)arents
+            else {
+                this.geneBank[key] = geneBank[key]; // missing gene, take parents
+            }
+
+            if (this.geneBank[key] === undefined) throw "splice(): bad gene";
+
         }
     }
 

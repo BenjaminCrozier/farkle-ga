@@ -37,6 +37,10 @@ function genomeFitness() {
     if (sorted[0].genomeLength > maxGenome) {
         console.log("new longestGenome:", sorted[0].genomeLength)
         maxGenome = sorted[0].genomeLength;
+        if (maxGenome > completeGenome){
+            console.log(sorted[0]);
+            debugger;
+        }
     }
 
     var gArr = [];
@@ -123,17 +127,7 @@ function epoch() {
         if (a.avgScore < b.avgScore) return 1;
         return 0;
     }
-
     playerArr = playerArr.sort(greaterHistory); // sort by genome length
-    // console.table(playerArr);
-    // debugger;
-
-    // // sort by score
-    // playerArr = playerArr.sort((a, b) => {
-    //     if (a.score > b.score) return -1;
-    //     if (a.score < b.score) return 1;
-    //     return 0;
-    // });
 
     // retain elite (winter cull)
     if (playerArr.length > cullThreshold) {
