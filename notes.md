@@ -138,5 +138,3 @@ fixed bug in player.splice(). Typescript would have identified this error immedi
 players with max genome length are appearing quickly and seem to persist, 
 
 ***
-
-new goal for winner: win 5 games. this should prove a high degree of fitness and be worthy of inspection. 
