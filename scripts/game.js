@@ -106,6 +106,6 @@ function playGame() {
     debugString = ""; //reset string after game
     while (!winner)
         playerArr.forEach(playRound);
-    // debug
+    winner.gamesWon++; //tally wins
     printWinner(); // display results
 }

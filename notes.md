@@ -132,8 +132,11 @@ I assumed this would encompass all possible combination of dice, converting the 
 `f(n)=6-n: 11=>[5,5], 554=>[1,1,2]` 
 however this fails to include double zeros, as we do not count 98-99-00-100. the base 6 conversion of 1-46656 very nearly approximates all possible combinations of 6 dice, it fails to describe the set of all 6's (or 1's, depending on your bijection/conversion), so 666666, 66666, 6666, 666, and 66 are missing. note, 0 (6), is not missing. No doubt some fantastic mathematical rule or formula is behind this.
 
+## 12/15/2022   
+fixed bug in player.splice(). Typescript would have identified this error immediately. In lieu of adding a compiler i've added a undefined check for the geneBank. 
 
+players with max genome length are appearing quickly and seem to persist, 
 
+***
 
-
-
+new goal for winner: win 5 games. this should prove a high degree of fitness and be worthy of inspection. 

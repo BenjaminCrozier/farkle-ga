@@ -30,26 +30,25 @@ function genomeFitness() {
         if (a.genomeLength < b.genomeLength) return 1;
         return 0;
     }
-
     var sorted = playerArr.sort(greaterGenome); // sort by genome length
+
+    var gArr = [];
 
     // log greatest genome
     if (sorted[0].genomeLength > maxGenome) {
         console.log("new longestGenome:", sorted[0].genomeLength)
         maxGenome = sorted[0].genomeLength;
-        if (maxGenome > completeGenome){
+        if (maxGenome > completeGenome) {
             console.log(sorted[0]);
             debugger;
         }
-    }
 
-    var gArr = [];
-    for (let i = 0; i < Math.floor(sorted.length / 100); i++) {
-        gArr.push(sorted[0].parent(sorted[i], "genome")); // propagate
+        for (let i = 0; i < Math.floor(sorted.length / 100); i++) {
+            gArr.push(sorted[0].parent(sorted[i], "genome")); // propagate
+        }
     }
 
     return gArr;
-
 }
 
 function perennialFitness() {
@@ -61,10 +60,6 @@ function perennialFitness() {
         return 0;
     }
     var sorted = playerArr.sort(greaterHistory); // sort by 
-
-    // nominate to afterLife
-    if (playAfterLife)
-        updateAfterLifePlayers(sorted[0]);
 
     var pArr = [];
     for (let i = 0; i < Math.floor(sorted.length / 5); i++) {
@@ -103,6 +98,23 @@ function punishFitness() {
 
 }
 
+function cull() {
+    // sort by legacy 
+    function greaterHistory(a, b) {
+        if (a.avgScore > b.avgScore) return -1;
+        if (a.avgScore < b.avgScore) return 1;
+        return 0;
+    }
+    playerArr = playerArr.sort(greaterHistory); // sort by legacy
+
+    // retain elite (winter cull)
+    if (playerArr.length > cullThreshold) {
+        playerArr = playerArr.splice(0, cullThreshold);
+    }
+
+    return playerArr;
+}
+
 var epochCounter = 0;
 function epoch() {
 
@@ -113,7 +125,6 @@ function epoch() {
 
     // new epoch
     epochCounter++;
-    winner.gamesWon++;
 
     // update player stats
     playerArr.forEach((p) => {
@@ -121,18 +132,11 @@ function epoch() {
         p.avgScore = p.culmScore / p.gamesPlayed; // get avg wins
     });
 
-    // sort by genome length
-    function greaterHistory(a, b) {
-        if (a.avgScore > b.avgScore) return -1;
-        if (a.avgScore < b.avgScore) return 1;
-        return 0;
-    }
-    playerArr = playerArr.sort(greaterHistory); // sort by genome length
+    //cull unfit population 
+    playerArr = cull();
 
-    // retain elite (winter cull)
-    if (playerArr.length > cullThreshold) {
-        playerArr = playerArr.splice(0, cullThreshold);
-    }
+    // nominate to afterLife
+    if (playAfterLife) updateAfterLifePlayers(playerArr[0]);
 
     //rank and propagate by score fitness
     var scoreChildren = scoreFitness();
@@ -143,6 +147,7 @@ function epoch() {
     //rank and propagate by perennial  fitness
     var legacyChildren = perennialFitness();
 
+    // punish squandering
     // playerArr = punishFitness();
 
     //merge

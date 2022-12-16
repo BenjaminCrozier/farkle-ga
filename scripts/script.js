@@ -1,7 +1,6 @@
 // game
 var winGoal = 10000; // game winning score
 var winner = null;
-var fitnessGoal = 1; // win in how many rounds? 
 var mutationRate = 160; // out of 1000
 
 // players
@@ -16,6 +15,9 @@ var maxLuck = false;
 var punishMode = false; // (lower your winGoal)
 var punishScale = 1; // exaggerate punishment;
 var completeGenome = 923; //should be longest possible genome
+
+// goal
+var fitnessGoal = 5; // win how many games? 
 
 // debug
 var debugPlay = false;
@@ -73,7 +75,7 @@ async function go() {
     await sleep(0); //page update
 
     // fitness goal met? (default case)
-    var goAgain = winner?.rounds > fitnessGoal;
+    var goAgain = winner?.gamesWon < fitnessGoal;
 
     // scoreTesting override (continue till all tests pass)
     if (scoreTesting) {
